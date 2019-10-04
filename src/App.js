@@ -1,31 +1,88 @@
 import React from 'react';
-import logo from './logo.svg';
-import './App.css';
-import {guaranteedString} from "./utils/sample-utils";
+import styled from 'styled-components';
 
-const a = 'real string';
-const b = undefined;
+import {Ladom} from "./Ladom";
+
+
+
+
+const palette = {
+      plum: '#4b54a1',
+      black: '#0c0e0d',
+      blueslate: '#465f73',
+      slate: '#5f5f7b',
+      drab: '#b1c3a9',
+      sky: '#5e86ba',
+      moon: '#b3961e',
+      midnight: '#0b2383',
+
+      gold: 'gold',
+      cornsilk: 'cornsilk',
+      blue: 'blue',
+      forest: 'forestgreen',
+      crimson: 'crimson'
+};
+
+const Layout = styled.div`
+    display:grid;
+    height: calc(100vh);
+    width: calc(100hw);
+    
+    row-gap:4px;
+    column-gap:4px;
+
+    grid-template-columns: 200px minmax(0, 1fr) 400px;
+    grid-template-rows: 30px minmax(0, 1fr) 30px;
+    grid-template-areas: "Navbar Navbar Navbar"
+                         "Left CenterBody Right"
+                         "Footer Footer Footer";    
+`;
+
+
+const Navbar = styled.section`
+    grid-area: Navbar;
+    background-color: ${palette.midnight};
+    color: ${palette.drab};
+`;
+const Footer = styled.section`
+    grid-row-start:3; 
+    grid-column-start:1; grid-column-end:4;
+    background-color: ${palette.blueslate};
+    color: ${palette.drab};
+`;
+
+const CenterBody = styled.section`
+    display: block;
+    height:100%;
+    grid-area: CenterBody
+    background-color: ${palette.drab};
+    color: ${palette.black};
+`;
+const Left = styled.section`
+    grid-area: Left
+    background-color: ${palette.cornsilk};
+    color: ${palette.midnight};
+`;
+const Right = styled.section`
+    grid-area: Right
+    background-color: ${palette.cornsilk};
+    color: ${palette.midnight};
+`;
+
+
+const somejsx = <div>Hello<br/>There</div>;
+
+const closef=()=>console.warn('closing');
 
 function App() {
   return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-        <br/> {guaranteedString(a)} <br/>{guaranteedString(b)}
-      </header>
-
-    </div>
+      <Layout>
+          <Navbar>There is text here</Navbar>
+          <Left>In left side bar?</Left>
+          <CenterBody>In middle</CenterBody>
+          <Right>In right sidebar?</Right>
+          <Footer>Status stuff is over here</Footer>
+      </Layout>
   );
 }
 
