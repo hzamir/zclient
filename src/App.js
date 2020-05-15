@@ -2,9 +2,9 @@ import React from 'react';
 import styled from 'styled-components';
 
 import {Ladom} from "./Ladom";
-
-
-
+import {MyGrid} from "./MyGrid";
+import {columnDefsMap} from "./xform/columndefs";
+import {toggleRight} from "./action-creators";
 
 const palette = {
       plum: '#4b54a1',
@@ -26,18 +26,19 @@ const palette = {
 const Layout = styled.div`
     display:grid;
     height: calc(100vh);
-    width: calc(100hw);
+    width: calc(100vw);
     
     row-gap:4px;
     column-gap:4px;
 
-    grid-template-columns: 200px minmax(0, 1fr) 400px;
+    grid-template-columns: ${props=>props.left}px minmax(0, 1fr) ${props=>props.right}px;
     grid-template-rows: 30px minmax(0, 1fr) 30px;
     grid-template-areas: "Navbar Navbar Navbar"
                          "Left CenterBody Right"
                          "Footer Footer Footer";    
 `;
 
+Layout.defaultProps = {left:200, right:100};
 
 const Navbar = styled.section`
     grid-area: Navbar;
@@ -54,17 +55,17 @@ const Footer = styled.section`
 const CenterBody = styled.section`
     display: block;
     height:100%;
-    grid-area: CenterBody
+    grid-area: CenterBody;
     background-color: ${palette.drab};
     color: ${palette.black};
 `;
 const Left = styled.section`
-    grid-area: Left
+    grid-area: Left;
     background-color: ${palette.cornsilk};
     color: ${palette.midnight};
 `;
 const Right = styled.section`
-    grid-area: Right
+    grid-area: Right;
     background-color: ${palette.cornsilk};
     color: ${palette.midnight};
 `;
@@ -74,16 +75,65 @@ const somejsx = <div>Hello<br/>There</div>;
 
 const closef=()=>console.warn('closing');
 
-function App() {
-  return (
-      <Layout>
-          <Navbar>There is text here</Navbar>
-          <Left>In left side bar?</Left>
-          <CenterBody>In middle</CenterBody>
-          <Right>In right sidebar?</Right>
-          <Footer>Status stuff is over here</Footer>
-      </Layout>
-  );
+
+
+
+const gridMap = {
+    Trades: 'aTrades',
+    Quotes: 'aQuotes',
+    Parties: 'aParties'
+};
+
+function nthTime(f,n)
+{
+    var counter = 0;
+    return function()
+    {
+        console.log(counter);
+        return (++counter === n)?
+            f.apply(this, arguments): undefined;
+    }
+
+
 }
+
+const getData = nthTime(function(props){
+   props.actions.omsPartyList();
+    props.actions.omsQuoteList();
+    props.actions.omsTradeList();
+}, 1);
+
+let interval;
+
+const  App = props => {
+
+   getData(props);
+
+   const {left,right} = props.layout;
+   const {pickGrid, omsTradeList, omsQuoteList, toggleLeft,toggleRight} = props.actions;
+   const rowDataProp = props.pickGrid;
+   const rowData = props[gridMap[rowDataProp]]||[];
+   const columnDefs =  columnDefsMap[rowDataProp];
+
+   console.info(`props for grid are ${rowDataProp}`, columnDefs, rowData);
+   return  (
+        <Layout left={left} right={right}>
+            <Navbar>There is text here
+                // put some buttons here to switch the grid
+                <button onClick={()=>{pickGrid('Trades');  clearInterval(interval);setInterval(omsTradeList, 1000)}}>Trades</button>
+                <button onClick={()=>{pickGrid('Quotes'); clearInterval(interval); interval = setInterval(omsQuoteList, 1000)}}>Quotes</button>
+                <button onClick={()=>{pickGrid('Parties'); clearInterval(interval);}}>Parties</button>
+                <button onClick={()=>{toggleLeft(100)}}>Left</button>
+                <button onClick={()=>{toggleRight(300)}}>Right</button>
+
+            </Navbar>
+            <Left>In left side bar?</Left>
+            <CenterBody><MyGrid rowData={rowData} columnDefs={columnDefs}/></CenterBody>
+            <Right>In right sidebar?</Right>
+            <Footer>Status stuff is over here</Footer>
+        </Layout>
+    );
+};
+
 
 export default App;
