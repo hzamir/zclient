@@ -31,6 +31,8 @@ tokens:
 
  */
 
+const isArrayOrObj = (v:any) => (v !== null && typeof v === 'object') || Array.isArray(v);
+
 
 export class Inflate {
   private extendedConfig:ConfigSingleton;
@@ -55,21 +57,59 @@ export class Inflate {
     {
       tokens.forEach((k:string)=>{
         try {
-          const parts = k.split('.');
-          let v: any = this.config;
-          for (let i = 0; i < parts.length; ++i) {
-            const k = parts[i];
-            v = v[k];
-          }
-          console.warn(`+registering token ${k}`,v);
+          const v = this.locateConfigProperty(k)
+          console.warn(`+registering token '${k}'`,v);
           this.registerValue(k,v);
         } catch(e) {
-          console.error(`inflate.registerTokens fails for ${k}`, e);
+          console.error(`inflate.registerTokens fails for '${k}' (Cannot find corresponding property chain in the config)`, e);
         }
 
       });
 
     }
+  }
+  /* look for config property of form a.b.c (etc.)
+     if it does not exist, return error stating how much of it does exist
+     distinguish missing key from key whose value is undefined
+  */
+  private locateConfigProperty(s:string)
+  {
+    const parts = s.split('.');
+    let v: any = this.config;
+    const len = parts.length;
+    const max = len - 1;
+
+    // write a message describing where nested property went wrong
+    const missingOrUndefined = (s:string, index:number, desc:string)=> {
+      const presentPart = index===0?
+        `top level prop '${parts[0]}' ${desc}` :
+        `'${parts[index]}' ${desc}, after '${parts.slice(0,index).join('.')}'`
+
+      return `looking for config property ${s}, ${presentPart}`;
+    }
+
+    for (let i = 0; i < len; ++i) {
+      const k = parts[i];
+      if(k in v) {
+        v = v[k];
+        //non-subscriptable but present values
+        if(i < max && !isArrayOrObj(v))
+          throw new Error(missingOrUndefined(s,i,`${parts[i]} cannot have subscript ['${parts[i+1]}']`));
+
+        if(v === undefined) {
+          const msg = missingOrUndefined(s, i, 'undefined')
+          if(i === max)
+            console.error(msg);  // do not throw, since maybe the final property is present, but not set to anything
+          else
+            throw new Error(msg); // definite configuration error if any but last property in chain is undefined
+        }
+      } else {
+        throw new Error(missingOrUndefined(s, i, 'missing'));
+      }
+    }
+
+    return v;
+
   }
 
   private registerValue(name:string, useValue:any)
