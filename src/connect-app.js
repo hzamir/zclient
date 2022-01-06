@@ -3,12 +3,13 @@ import * as funcs from "./action-funcs";
 import {applyMiddleware, bindActionCreators, combineReducers, createStore} from "redux";
 import {composeWithDevTools} from "redux-devtools-extension";
 import {getMiddleware, init} from "./example-redux-middleware";
-import {createSelector} from "reselect";
 import * as actionCreators from "./action-creators";
 import {connect, Provider} from "react-redux";
 import App from "./App";
 import {render} from "react-dom";
 import React from "react";
+
+import { selectors } from "./redux/selectors";
 
 import './index.css';
 
@@ -35,23 +36,8 @@ const store = createStore(
 );
 
 
-
-// relect code here
-const tradesSelector    = s => s.myreducer.trades;
-const partiesSelector   = s => s.myreducer.parties;
-const quotesSelector    = s => s.myreducer.quotes;
-
-const aTradesSelector  = createSelector(tradesSelector, o=>Object.values(o).slice(-100));
-const aQuotesSelector  = createSelector(quotesSelector, o=>Object.values(o));
-const aPartiesSelector = createSelector(partiesSelector, o=>Object.values(o));
-
-
 const mapStateToProps = state => {
-
-  const aTrades  = aTradesSelector(state);
-  const aQuotes  = aQuotesSelector(state);
-  const aParties = aPartiesSelector(state);
-  return {...state.myreducer, aTrades,aQuotes,aParties};
+  return {...state.myreducer, ...selectors(state.myreducer), xyz:1};
 };
 
 
