@@ -1,5 +1,5 @@
 import axios from 'axios';
-import {reqIdGenerate} from "./reqIdGenerator";
+// import {reqIdGenerate} from "../utils/reqIdGenerator";
 
 const middlestyle = `
     padding: 2px 8px;
@@ -52,7 +52,7 @@ export const getMiddleware = store => next => action => {
     const startsWithOms = aType.startsWith('oms');
     const isResponse = startsWithOms && aType.endsWith('Response');
 
-    reqIdGenerate();
+    // reqIdGenerate();
 
 
     if(startsWithOms && !isResponse)

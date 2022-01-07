@@ -1,5 +1,5 @@
 import {initialState} from "../constants/initial-state";
-import * as funcs from "../action-funcs";
+import * as funcs from "./action-funcs";
 
 const actionstyle = `
     padding: 2px 8px;
