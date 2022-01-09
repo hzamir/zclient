@@ -8,6 +8,8 @@ import {StateForm} from "./StateForm";
 import { securityLightConfig, sec2, securityLightPlantUml} from "./fsm-configs/security-light";
 import {glassMachineConfig} from "./fsm-configs/glass";
 import {umlHeartbeatSubscription,heartbeatXStateConfig} from './fsm-configs/subscription';
+import { useSelector } from './redux/use-selector';
+import {actions} from './redux/actions';
 
 const palette = {
       plum: '#4b54a1',
@@ -108,17 +110,20 @@ const getData = nthTime(function(props){
 
 let interval;
 
-const  App = props => {
+const  App = (props) => {
+  const {left, right} = useSelector(s=>s.layout);
+  // const gridMap = useSelector(s=>s.gridMap);
 
-   getData(props);
+  const {pickGrid, omsTradeList, omsQuoteList, toggleLeft,toggleRight} = actions();
 
-   const {left,right} = props.layout;
-   const {pickGrid, omsTradeList, omsQuoteList, toggleLeft,toggleRight} = props.actions;
-   const rowDataProp = props.pickGrid;
-   const rowData = props[gridMap[rowDataProp]]||[];
-   const columnDefs =  columnDefsMap[rowDataProp];
 
-   console.info(`props for grid are ${rowDataProp}`, columnDefs, rowData);
+  // const rowData = gridMap[rowDataProp] || [];
+  //
+  //
+  //  const rowDataProp = pickGrid;
+  //  const columnDefs =  columnDefsMap[rowDataProp];
+
+   // console.info(`props for grid are ${rowDataProp}`, columnDefs, rowData);
 
    return  (
         <Layout left={left} right={right}>
