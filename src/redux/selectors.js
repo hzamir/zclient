@@ -5,9 +5,9 @@ const tradesSelector    = s => s.trades;
 const partiesSelector   = s => s.parties;
 const quotesSelector    = s => s.quotes;
 
-const aTradesSelector  = createSelector(tradesSelector, o=>Object.values(o).slice(-100));
-const aQuotesSelector  = createSelector(quotesSelector, o=>Object.values(o));
-const aPartiesSelector = createSelector(partiesSelector, o=>Object.values(o));
+export const aTradesSelector  = createSelector(tradesSelector, o=>Object.values(o).slice(-100));
+export const aQuotesSelector  = createSelector(quotesSelector, o=>Object.values(o));
+export const aPartiesSelector = createSelector(partiesSelector, o=>Object.values(o));
 
 
 // returns selectors from state
