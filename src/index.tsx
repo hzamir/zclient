@@ -4,9 +4,11 @@ import {Inflate} from "./utils/inflate";
 
 // get the relevant classes registered for injection with an import
 import './fsm-utils/test-class';
-import {connectApp} from "./connect-app";
-
-
+import './index.css';
+import {connectRootComponent} from './redux/connect-react-app-to-redux';
+import {default as App} from './App';
+import {render} from "react-dom";
+import React from "react";
 
 
 (async ()=>{
@@ -16,7 +18,9 @@ import {connectApp} from "./connect-app";
         const inflate = new Inflate(config);
         const extendedConfig = inflate.intializeSequence('bootSequence');
 
-        connectApp();
+        const RootComponent =  connectRootComponent(App) as unknown as React.Component;
+        // @ts-ignore
+        render(<RootComponent/>,  document.getElementById('root'));
     } catch(e) {
         console.error(e);
     }
