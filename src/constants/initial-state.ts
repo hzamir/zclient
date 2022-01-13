@@ -8,7 +8,7 @@ export const initialState = {
     acounter: 0,
     bcounter: 0,
     user: 'yoyo',
-    pickGrid: 'Trades',
+    gridChoice: 'Trades',
     omsInfo: {version: '*unknown*'},
     parties: {},
     quotes: {},

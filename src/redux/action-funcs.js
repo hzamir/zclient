@@ -93,6 +93,6 @@ export const omsQuoteListResponse       = stateProducer('quotes', 'name');
 export const omsTradeListResponse       = stateProducer('trades', 'sequence');
 export const omsPartyListResponse       = stateProducer('parties', 'name');
 
-export const pickGrid = (state, {value})=>({...state, pickGrid:value});
+export const pickGrid = (state, {value})=>({...state, gridChoice:value});
 export const toggleLeft =(state, {expanded})=>({...state, layout: {...state.layout, left: state.layout.left? 0: expanded}});
 export const toggleRight =(state, {expanded})=>({...state, layout: {...state.layout, right: state.layout.right? 0: expanded}});

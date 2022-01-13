@@ -1,4 +1,4 @@
-import React from 'react';
+import React, {useEffect, useRef} from 'react';
 import styled from 'styled-components';
 
 import {Ladom} from "./Ladom";
@@ -10,6 +10,7 @@ import {glassMachineConfig} from "./fsm-configs/glass";
 import {umlHeartbeatSubscription,heartbeatXStateConfig} from './fsm-configs/subscription';
 import { useSelector } from './redux/use-selector';
 import {actions} from './redux/actions';
+import {aPartiesSelector, aQuotesSelector, aTradesSelector, selectors} from "./redux/selectors";
 
 const palette = {
       plum: '#4b54a1',
@@ -89,39 +90,42 @@ const gridMap = {
     Parties: 'aParties'
 };
 
-function nthTime(f,n)
-{
-    var counter = 0;
-    return function()
-    {
-        console.log(counter);
-        return (++counter === n)?
-            f.apply(this, arguments): undefined;
-    }
 
-
-}
-
-
+let interval;
 const  App = (props) => {
   const {left, right} = useSelector(s=>s.layout);
-  // const gridMap = useSelector(s=>s.gridMap);
+  const gridChoice = useSelector(s=>s.gridChoice);
+  const {aTrades,aQuotes,aParties} = useSelector(selectors);
+
+  const rowDataPicker = {aTrades,aQuotes,aParties};
+
+  useEffect(()=>{
+    const {omsTradeList, omsQuoteList, omsPartyList} = actions();
+    omsPartyList();
+    omsQuoteList();
+    omsTradeList();
+  }, [])
+
 
   const {pickGrid, omsTradeList, omsQuoteList, toggleLeft,toggleRight, omsVersion} = actions();
 
+  const rowDataProp = gridChoice;
+  const rowData = rowDataPicker[gridMap[rowDataProp]]||[];
 
-  // const rowData = gridMap[rowDataProp] || [];
-  //
-  //
-  //  const rowDataProp = pickGrid;
-  //  const columnDefs =  columnDefsMap[rowDataProp];
+  const columnDefs =  columnDefsMap[rowDataProp];
 
-   // console.info(`props for grid are ${rowDataProp}`, columnDefs, rowData);
+  console.info(`props for grid are ${rowDataProp}`, columnDefs, rowData, aQuotes);
+
 
    return  (
         <Layout left={left} right={right}>
             <Navbar>There is text here
-                // put some buttons here to switch the grid
+
+              <button onClick={()=>{pickGrid('Trades');  clearInterval(interval);setInterval(omsTradeList, 1000)}}>Trades</button>
+              <button onClick={()=>{pickGrid('Quotes'); clearInterval(interval); interval = setInterval(omsQuoteList, 1000)}}>Quotes</button>
+              <button onClick={()=>{pickGrid('Parties'); clearInterval(interval);}}>Parties</button>
+
+              // put some buttons here to switch the grid
                 <button onClick={()=>{toggleLeft(100)}}>Left</button>
                 <button onClick={()=>{toggleRight(300)}}>Right</button>
                 <button onClick={omsVersion}>OMS Version</button>
@@ -130,14 +134,17 @@ const  App = (props) => {
 
             </Navbar>
             <Left>In left side bar?</Left>
-            <CenterBody>
-              <textarea readOnly={true} value={umlHeartbeatSubscription}/>
-              <StateForm expanded={true} stConfig={heartbeatXStateConfig}/>
-              <StateForm expanded={true} stConfig={securityLightConfig}/>
-              <StateForm expanded={true} stConfig={glassMachineConfig}/>
-                {/*<MyGrid rowData={rowData} columnDefs={columnDefs}/>*/}
 
-            </CenterBody>
+          <CenterBody><MyGrid rowData={rowData} columnDefs={columnDefs}/></CenterBody>
+
+          {/*<CenterBody>*/}
+          {/*    <textarea readOnly={true} value={umlHeartbeatSubscription}/>*/}
+          {/*    <StateForm expanded={true} stConfig={heartbeatXStateConfig}/>*/}
+          {/*    <StateForm expanded={true} stConfig={securityLightConfig}/>*/}
+          {/*    <StateForm expanded={true} stConfig={glassMachineConfig}/>*/}
+          {/*      /!*<MyGrid rowData={rowData} columnDefs={columnDefs}/>*!/*/}
+
+          {/*  </CenterBody>*/}
             <Right>In right sidebar?</Right>
             <Footer>Status stuff is over here</Footer>
         </Layout>
