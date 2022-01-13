@@ -107,7 +107,7 @@ const  App = (props) => {
   const {left, right} = useSelector(s=>s.layout);
   // const gridMap = useSelector(s=>s.gridMap);
 
-  const {pickGrid, omsTradeList, omsQuoteList, toggleLeft,toggleRight} = actions();
+  const {pickGrid, omsTradeList, omsQuoteList, toggleLeft,toggleRight, omsVersion} = actions();
 
 
   // const rowData = gridMap[rowDataProp] || [];
@@ -124,6 +124,9 @@ const  App = (props) => {
                 // put some buttons here to switch the grid
                 <button onClick={()=>{toggleLeft(100)}}>Left</button>
                 <button onClick={()=>{toggleRight(300)}}>Right</button>
+                <button onClick={omsVersion}>OMS Version</button>
+              <button onClick={()=>{omsVersion();omsVersion();omsVersion();omsVersion();omsVersion();omsVersion()}}>OMS Version Bomb</button>
+
 
             </Navbar>
             <Left>In left side bar?</Left>

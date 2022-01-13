@@ -28,7 +28,7 @@ const closeRequest = (state, errorOrResponseMeta) => {
     //...todo check for Error or no need when closedRequests changes and contents contain error info
     const {[reqId]:closing = null,...allOtherRequests} = state.openRequests;
 
-    const openRequestCount = state.openRequestCount - closing?  1: 0; // in case somehow redundantly closed (bad identifiers, double response)
+    const openRequestCount = state.openRequestCount - (closing?  1: 0); // in case somehow redundantly closed (bad identifiers, double response)
     const addToClosed = {
                             ...(message && {errorInfo:{name,message,stack}})  // idiom to conditionally add errorInfo if it is an error
                         };
