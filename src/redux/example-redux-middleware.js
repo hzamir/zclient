@@ -1,4 +1,5 @@
 import axios from 'axios';
+import {reqIdGenerate, elapsedSinceReqId} from "../utils/reqIdGenerator";
 // import {reqIdGenerate} from "../utils/reqIdGenerator";
 
 const middlestyle = `
@@ -45,21 +46,46 @@ function createUrl(action, method) {
     return `${baseUrl}${path}${tailPath}`;
 }
 
+const axiosConfig = { timeout: 30 };
+
 export const getMiddleware = store => next => action => {
 
     const aType = action.type || '';
 
     const startsWithOms = aType.startsWith('oms');
-    const isResponse = startsWithOms && aType.endsWith('Response');
-
-    // reqIdGenerate();
-
+    const isResponse = startsWithOms && (aType.endsWith('Response') || aType.endsWith('Error'));  // all errors here are exceptions in this case
+    //
+    let reqId;
 
     if(startsWithOms && !isResponse)
     {
+        const reqId = reqIdGenerate(); // generate a unique request identifier
+
         const rAction = aType+'Response';
-        const responsef = (response)=>_actions[rAction](response);
-        const catchf = error=>console.error(error);
+        const eAction = aType+'Error';
+
+        const responsef = (response)=> {
+
+            // todo differentiate errorResponses (like non 200 status) and exceptions
+
+            const {elapsedMicros, elapsedStr:elapsed} = elapsedSinceReqId(performance.now(), reqId);
+
+            const respMeta = { reqId, elapsed, elapsedMicros };
+            _actions[rAction](response, respMeta);
+
+
+        }
+        const catchf    = (error)=> {
+            const {elapsedMicros, elapsedStr:elapsed} = elapsedSinceReqId(performance.now(), reqId);
+            const {name,message,stack} = error;
+
+            // error information includes properties of error, reqId and elapsed time since request was made
+            const errorMeta = {name, message, reqId, elapsed, elapsedMicros, stack };
+
+            console.error(`${eAction} reqId:${reqId} exception after: ${elapsed}`, errorMeta);
+            _actions[eAction](errorMeta);
+
+        };
 
         const method = action.post? 'post': 'get';
         const url = createUrl(action,method);
@@ -69,16 +95,17 @@ export const getMiddleware = store => next => action => {
         switch(method)
         {
             case 'post':
-                axios.post(url, {...action.body}).then(responsef).catch(catchf);
+                axios.post(url, {...action.body}, axiosConfig).then(responsef).catch(catchf);
                 break;
             case 'get':
             default:
                 if(action.params)
-                    axios.get(url, {params:action.params} ).then(responsef).catch(catchf);
+                    axios.get(url, {...axiosConfig, params:action.params} ).then(responsef).catch(catchf);
                 else
-                    axios.get(url).then(responsef).catch(catchf);
+                    axios.get(url, axiosConfig).then(responsef).catch(catchf);
         }
+        return next({...action,reqId, url}); // decorate action with reqId and url, actions will record it
     }
 
-    next(action);
+    return next(action);
 };

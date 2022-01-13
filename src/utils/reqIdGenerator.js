@@ -41,17 +41,28 @@ function ts(micros) {
     const [us, SSS, ss, mm, hh, dd] = [usPerMs,msPerSec,secsPerMin,minsPerHr, hrsPerDay, 1].map((div,i)=>{
         const v = r % div;
         r = (r-v) / div;
-        return (''+v).padStart(i<2?3:2,'0');
+        return (''+v).padStart(i<2?3:2,'0'); // we want 3 digits of last two numbers in string
     });
-
     return `${dd} days ${hh}:${mm}:${ss}.${SSS}${us}`;
 
 }
+//last minute hack, clearly ts is screwed up for it new purpose
+function ts2(micros) {
+    let r = micros;
 
+    let microsPart;
+    const [us, SSS, ss, mm, hh, dd] = [usPerMs,msPerSec,secsPerMin,minsPerHr, hrsPerDay, 1].map((div,i)=>{
+        if(i === 0)
+            microsPart = i;
+        const v = r % div;
+        r = (r-v) / div;
+        return (''+v).padStart(i<2?3:2,'0'); // we want 3 digits of last two numbers in string
+    });
 
-
-export function describeReqId(reqId) {
-
+    return `${dd} days ${hh}:${mm}:${ss}.${SSS}${us.slice(0,1)}`;
+}
+function parseReqId(reqId)
+{
     const {origin, now, counter} = reqIdRegEx.exec(reqId).groups;
 
     const nOrigin     = parseInt(origin,36)/1000;
@@ -60,6 +71,15 @@ export function describeReqId(reqId) {
     const nCounter    = parseIgnore(counter);
     const mOrigin     = DateTime.fromMillis(nOrigin);
     const mRequest    = DateTime.fromMillis(nOrigin+nNowMillis);
+
+   return {nOrigin,nNowMicros, nNowMillis, nCounter, mOrigin, mRequest};
+
+}
+
+
+export function describeReqId(reqId) {
+
+    const {nNowMicros,  nCounter, mOrigin, mRequest} = parseReqId(reqId);
     const originStr   = mOrigin.toFormat(dateTimeFmt);
     const reqStr      = mRequest.toFormat(dateTimeFmt);
 
@@ -69,11 +89,23 @@ export function describeReqId(reqId) {
     return {'req#':nCounter, since, reqts:reqStr, appts:originStr};
 }
 
+export function elapsedSinceReqId(tsMicros, reqId)
+{
+
+    const parsed = parseReqId(reqId);
+    const {nNowMicros:reqTsMicros} = parsed;
+
+    const adjReqTsMicros = reqTsMicros * 0.001;
+
+    const elapsedMicros = parseFloat(((tsMicros - adjReqTsMicros)*100).toFixed(3));  // todo limit fractional part
+    const elapsedStr = ts2(elapsedMicros)
+    return {elapsedMicros, elapsedStr};
+}
 export function reqIdGenerate()
 {
     const id =  `#${timeOrigin}+${formatNow(performance.now())}=${formatCtr(++requestCounter)}`;
-    const desc = describeReqId(id);
-    console.warn(`id = ${id}`, desc);
+    // const desc = describeReqId(id);
+    // console.warn(`id = ${id}`, desc);
 
     return id;
 }

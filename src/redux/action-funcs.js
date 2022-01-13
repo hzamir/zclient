@@ -1,3 +1,5 @@
+import {describeReqId} from "../utils/reqIdGenerator";
+
 export function Increment(state, {counter})
 {
     const val = state[counter] + 1;
@@ -11,7 +13,34 @@ export function Decrement(state, {counter})
 }
 
 
-export const omsVersion = (state)=> state;
+const openRequest = (state, {type, reqId, url}) => ({
+                                                      ...state,
+                                                      openRequestCount: state.openRequestCount+1,
+                                                          openRequests: {...state.openRequests, [reqId]: {type, url, when: describeReqId(reqId)}},
+                                                          maxOpenRequestCount: Math.max(state.maxOpenRequestCount, state.openRequestCount+1)
+                                                   });
+
+// close any request does not return entire state, is folded into other reponses
+const closeRequest = (state, errorOrResponseMeta) => {
+
+    const { reqId, elapsed, elapsedMicros, name=undefined, message=undefined, stack=undefined} = errorOrResponseMeta;
+
+    //...todo check for Error or no need when closedRequests changes and contents contain error info
+    const {[reqId]:closing = null,...allOtherRequests} = state.openRequests;
+
+    const openRequestCount = state.openRequestCount - closing?  1: 0; // in case somehow redundantly closed (bad identifiers, double response)
+    const addToClosed = {
+                            ...(message && {errorInfo:{name,message,stack}})  // idiom to conditionally add errorInfo if it is an error
+                        };
+
+    // add to closed Requests, but keep limited number of them
+    const closedRequests = closing? [{reqId, elapsed, elapsedMicros,...closing, ...addToClosed}, ...state.closedRequests].slice(0, 10) : state.closedRequests;
+    const closedRequestCount = state.closedRequestCount + (closing? 1: 0);
+
+    return {openRequestCount, openRequests: {...allOtherRequests}, closedRequests, closedRequestCount };
+};
+
+export const omsVersion = (state, action)=> openRequest(state, action); // action must have reqId and url set by middleware
 
 export const omsOrderBid = (state, {symbol,party,price,quantity})=> state;
 export const omsOrderAsk = (state, {symbol,party,price,quantity})=> state;
@@ -26,13 +55,14 @@ export const omsTradeList = (state)=>state;
 export const omsTradeListSymbol = (state, {tail})=>state;
 export const omsTradeListFromTo = (state, {params})=>state;
 
-export const omsVersionResponse         = (state,{response})=>state;
-export const omsOrderBidResponse        = (state,{response})=>state;
-export const omsOrderAskResponse        = (state,{response})=>state;
-export const omsPartyLookupResponse     = (state,{response})=>state;
-export const omsPartyCreateResponse     = (state,{response})=>state;
-export const omsTradeListSymbolResponse = (state,{response})=>state;
-export const omsTradeListFromToResponse = (state,{response})=>state;
+export const omsVersionResponse         = (state,{response,respMeta})=>({...state, omsInfo:{version:response.data}, ...closeRequest(state,respMeta)});
+export const omsVersionError            = (state,{errorMeta})=>({...state, ...closeRequest(state,errorMeta)});  // todo add error for closing request
+export const omsOrderBidResponse        = (state,{response,respMeta})=>state;
+export const omsOrderAskResponse        = (state,{response,respMeta})=>state;
+export const omsPartyLookupResponse     = (state,{response,respMeta})=>state;
+export const omsPartyCreateResponse     = (state,{response,respMeta})=>state;
+export const omsTradeListSymbolResponse = (state,{response,respMeta})=>state;
+export const omsTradeListFromToResponse = (state,{response,respMeta})=>state;
 
 // generate an accumulator function to use with reduce that maps all object values to a specified keyfield in that value
 function rdExtractGenerator(keyField)
@@ -66,5 +96,5 @@ export const omsTradeListResponse       = stateProducer('trades', 'sequence');
 export const omsPartyListResponse       = stateProducer('parties', 'name');
 
 export const pickGrid = (state, {value})=>({...state, pickGrid:value});
-export const ToggleLeft =(state, {expanded})=>({...state, layout: {...state.layout, left: state.layout.left? 0: expanded}});
-export const ToggleRight =(state, {expanded})=>({...state, layout: {...state.layout, right: state.layout.right? 0: expanded}});
+export const toggleLeft =(state, {expanded})=>({...state, layout: {...state.layout, left: state.layout.left? 0: expanded}});
+export const toggleRight =(state, {expanded})=>({...state, layout: {...state.layout, right: state.layout.right? 0: expanded}});

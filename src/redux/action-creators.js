@@ -2,12 +2,26 @@ export const increment = (counter)=>({type:'Increment', counter});
 export const decrement = (counter)=>({type:'Decrement', counter});
 
 export const pickGrid = (value)=>({type:'pickGrid', value});
-export const toggleLeft = (expanded) =>({type: 'ToggleLeft', expanded});
-export const toggleRight = (expanded) =>({type: 'ToggleRight', expanded});
+export const toggleLeft = (expanded) =>({type: toggleLeft.name, expanded});
+
+
+function makeActionCreator(type, ...argNames) {
+  return function (...args) {
+    const action = { type }
+    argNames.forEach((arg, index) => {
+      action[argNames[index]] = args[index]
+    })
+    return action
+  }
+}
+
+
+
+
+export const toggleRight = (expanded) =>({type: toggleRight.name, expanded});
 
 
 export const omsVersion = ()=> ({type:'omsVersion', get:'/version'});
-
 export const omsOrderBid = (symbol,party,price,quantity)=> ({type:'omsOrderBid', post:'/order/bid', body:{symbol,party,price,quantity}});
 export const omsOrderAsk = (symbol,party,price,quantity)=> ({type:'omsOrderAsk', post:'/order/ask', body:{symbol,party,price,quantity}});
 
@@ -22,7 +36,9 @@ export const omsTradeListSymbol = (id)=> ({type:'omsTradeListSymbol', get:'/trad
 export const omsTradeListFromTo = (from,to)=> ({type:'omsTradeListFromTo', get:1, params:{from,to}});
 
 
-export const omsVersionResponse         = (response)=> ({type:'omsVersionResponse',         response});
+export const omsVersionResponse         = (response, respMeta)=> ({type:'omsVersionResponse',  response, respMeta});
+export const omsVersionError            = (errorMeta)=> ({type:'omsVersionError', errorMeta});
+
 export const omsOrderBidResponse        = (response)=> ({type:'omsOrderBidResponse',        response});
 export const omsOrderAskResponse        = (response)=> ({type:'omsOrderAskResponse',        response});
 export const omsPartyListResponse       = (response)=> ({type:'omsPartyListResponse',       response});
