@@ -39,12 +39,12 @@ export const omsTradeListFromTo = (from,to)=> ({type:'omsTradeListFromTo', get:1
 export const omsVersionResponse         = (response, respMeta)=> ({type:'omsVersionResponse',  response, respMeta});
 export const omsVersionError            = (errorMeta)=> ({type:'omsVersionError', errorMeta});
 
-export const omsOrderBidResponse        = (response)=> ({type:'omsOrderBidResponse',        response});
-export const omsOrderAskResponse        = (response)=> ({type:'omsOrderAskResponse',        response});
-export const omsPartyListResponse       = (response)=> ({type:'omsPartyListResponse',       response});
-export const omsPartyLookupResponse     = (response)=> ({type:'omsPartyLookupResponse',     response});
-export const omsPartyCreateResponse     = (response)=> ({type:'omsPartyCreateResponse',     response});
-export const omsQuoteListResponse       = (response)=> ({type:'omsQuoteListResponse',       response});
-export const omsTradeListResponse       = (response)=> ({type:'omsTradeListResponse',       response});
-export const omsTradeListSymbolResponse = (response)=> ({type:'omsTradeListSymbolResponse', response});
-export const omsTradeListFromToResponse = (response)=> ({type:'omsTradeListFromToResponse', response});
+export const omsOrderBidResponse        = (response, respMeta)=> ({type:'omsOrderBidResponse',        response, respMeta});
+export const omsOrderAskResponse        = (response, respMeta)=> ({type:'omsOrderAskResponse',        response, respMeta});
+export const omsPartyListResponse       = (response, respMeta)=> ({type:'omsPartyListResponse',       response, respMeta});
+export const omsPartyLookupResponse     = (response, respMeta)=> ({type:'omsPartyLookupResponse',     response, respMeta});
+export const omsPartyCreateResponse     = (response, respMeta)=> ({type:'omsPartyCreateResponse',     response, respMeta});
+export const omsQuoteListResponse       = (response, respMeta)=> ({type:'omsQuoteListResponse',       response, respMeta});
+export const omsTradeListResponse       = (response, respMeta)=> ({type:'omsTradeListResponse',       response, respMeta});
+export const omsTradeListSymbolResponse = (response, respMeta)=> ({type:'omsTradeListSymbolResponse', response, respMeta});
+export const omsTradeListFromToResponse = (response, respMeta)=> ({type:'omsTradeListFromToResponse', response, respMeta});

@@ -15,7 +15,7 @@ export function Decrement(state, {counter})
 
 const openRequest = (state, {type, reqId, url}) => ({
                                                       ...state,
-                                                      openRequestCount: state.openRequestCount+1,
+    openRequestCount: state.openRequestCount+1,
                                                           openRequests: {...state.openRequests, [reqId]: {type, url, when: describeReqId(reqId)}},
                                                           maxOpenRequestCount: Math.max(state.maxOpenRequestCount, state.openRequestCount+1)
                                                    });
@@ -42,18 +42,17 @@ const closeRequest = (state, errorOrResponseMeta) => {
 
 export const omsVersion = (state, action)=> openRequest(state, action); // action must have reqId and url set by middleware
 
-export const omsOrderBid = (state, {symbol,party,price,quantity})=> state;
-export const omsOrderAsk = (state, {symbol,party,price,quantity})=> state;
+export const omsOrderBid = (state, action)=> openRequest(state, action);
+export const omsOrderAsk = (state, action)=> openRequest(state, action);
+export const omsPartyList   = (state, action)=> openRequest(state, action);
+export const omsPartyLookup = (state,action)=>openRequest(state, action);
+export const omsPartyCreate = (state,action)=>openRequest(state, action);
 
-export const omsPartyList   = (state)=> state;
-export const omsPartyLookup = (state,{tail})=>state;
-export const omsPartyCreate = (state,{post,tail})=>state;
+export const omsQuoteList = (state,action)=>openRequest(state, action);
 
-export const omsQuoteList = (state)=>state;
-
-export const omsTradeList = (state)=>state;
-export const omsTradeListSymbol = (state, {tail})=>state;
-export const omsTradeListFromTo = (state, {params})=>state;
+export const omsTradeList = (state,action)=>openRequest(state, action);
+export const omsTradeListSymbol = (state,action)=>openRequest(state, action);
+export const omsTradeListFromTo = (state,action)=>openRequest(state, action);
 
 export const omsVersionResponse         = (state,{response,respMeta})=>({...state, omsInfo:{version:response.data}, ...closeRequest(state,respMeta)});
 export const omsVersionError            = (state,{errorMeta})=>({...state, ...closeRequest(state,errorMeta)});  // todo add error for closing request
@@ -77,15 +76,14 @@ function rdExtractGenerator(keyField)
 
 // generate a reducer that
 // accepts a response.data array of objects, reducing it and returning accumulated result in propName
-// accepts a response.data array of objects, reducing it and returning accumulated result in propName
-// accepts a response.data array of objects, reducing it and returning accumulated result in propName
 // the reducer takes the keyField, and assigns each value to the key field in the accumulator
 function stateProducer(propName, keyField) {
     const extractorf = rdExtractGenerator(keyField);
 
-    return function(state,{response}) {
+    return function(state, {response, respMeta}) {
         const result = response.data.reduce(extractorf, {});
-        return {...state, [propName]:result}
+        const closeRequestChanges = closeRequest(state, respMeta);
+        return {...state, [propName]:result, ...closeRequestChanges};
     }
 }
 
