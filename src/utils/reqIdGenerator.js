@@ -15,8 +15,6 @@ const timeOrigin = formatOrigin(performance.timeOrigin);
 
 const dateTimeFmt = "yyyy-MM-dd HH:mm:ss.SSS";
 
-let pNowMicros = 0;
-
 const reqIdRegEx = /#(?<origin>[0-9a-z]{11})\+(?<now>[0-9,.]{15})=(?<counter>[0-9,]{7})/;
 
 const ignoreRegex = /(,|\.)/g;
@@ -52,9 +50,10 @@ function ts(micros) {
 
 
 
-function describeReqId(reqId) {
+export function describeReqId(reqId) {
 
     const {origin, now, counter} = reqIdRegEx.exec(reqId).groups;
+
     const nOrigin     = parseInt(origin,36)/1000;
     const nNowMicros  = parseIgnore(now);
     const nNowMillis  = nNowMicros * 0.001;
@@ -65,12 +64,9 @@ function describeReqId(reqId) {
     const reqStr      = mRequest.toFormat(dateTimeFmt);
 
     const since = ts(nNowMicros);
-    const delta = ts(nNowMicros-pNowMicros);
 
-    pNowMicros = nNowMicros;
-
-
-    return {originStr,reqStr,nCounter,since,delta};
+    // when application started
+    return {'req#':nCounter, since, reqts:reqStr, appts:originStr};
 }
 
 export function reqIdGenerate()
