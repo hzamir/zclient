@@ -1,5 +1,6 @@
 import axios from 'axios';
 import {reqIdGenerate, elapsedSinceReqId} from "../utils/reqIdGenerator";
+import {omsApiCatchAllError} from "./action-funcs";
 // import {reqIdGenerate} from "../utils/reqIdGenerator";
 
 const middlestyle = `
@@ -83,8 +84,10 @@ export const getMiddleware = store => next => action => {
             const errorMeta = {name, message, reqId, elapsed, elapsedMicros, stack };
 
             console.error(`${eAction} reqId:${reqId} exception after: ${elapsed}`, errorMeta);
-            _actions[eAction](errorMeta);
 
+            // run either specific or generic api error handler
+
+            (_actions[eAction] ?? _actions['omsApiCatchAllError'])(errorMeta);
         };
 
         const method = action.post? 'post': 'get';

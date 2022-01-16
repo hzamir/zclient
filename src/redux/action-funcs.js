@@ -12,7 +12,20 @@ export function Decrement(state, {counter})
     return  {...state, [counter]:val}
 }
 
+export const halveInterval = s =>{
+  let {pollInterval: iv} =s;
+  iv = iv < 50? iv: iv * 0.5;
+  return {...s, pollInterval: iv};
+};
 
+
+export const doubleInterval = s =>{
+  let {pollInterval: iv} = s;
+  iv = iv > 100_000_000? iv: iv * 2;
+  return {...s, pollInterval: iv};
+};
+
+// a utility that that implements any action that implies making an api call tracing it to completion
 const openRequest = (state, {type, reqId, url}) => ({
                                                       ...state,
     openRequestCount: state.openRequestCount+1,
@@ -55,6 +68,9 @@ export const omsTradeListSymbol = (state,action)=>openRequest(state, action);
 export const omsTradeListFromTo = (state,action)=>openRequest(state, action);
 
 export const omsVersionResponse         = (state,{response,respMeta})=>({...state, omsInfo:{version:response.data}, ...closeRequest(state,respMeta)});
+
+export const omsApiCatchAllError        = (state,{errorMeta})=>({...state, ...closeRequest(state,errorMeta)});  // todo add error for closing request
+
 export const omsVersionError            = (state,{errorMeta})=>({...state, ...closeRequest(state,errorMeta)});  // todo add error for closing request
 export const omsOrderBidResponse        = (state,{response,respMeta})=>state;
 export const omsOrderAskResponse        = (state,{response,respMeta})=>state;

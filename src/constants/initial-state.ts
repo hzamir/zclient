@@ -9,6 +9,7 @@ export const initialState = {
     bcounter: 0,
     user: 'yoyo',
     gridChoice: 'Trades',
+    pollInterval: 1_073_741_824, // a big power of two, to start
     omsInfo: {version: '*unknown*'},
     parties: {},
     quotes: {},

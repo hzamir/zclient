@@ -20,6 +20,10 @@ function makeActionCreator(type, ...argNames) {
 
 export const toggleRight = (expanded) =>({type: toggleRight.name, expanded});
 
+export const halveInterval = ()=>({type: halveInterval.name});
+export const doubleInterval =()=>({type: doubleInterval.name});
+
+
 
 export const omsVersion = ()=> ({type:'omsVersion', get:'/version'});
 export const omsOrderBid = (symbol,party,price,quantity)=> ({type:'omsOrderBid', post:'/order/bid', body:{symbol,party,price,quantity}});
@@ -35,6 +39,8 @@ export const omsTradeList = ()=> ({type:'omsTradeList', get:1});
 export const omsTradeListSymbol = (id)=> ({type:'omsTradeListSymbol', get:'/trade/list', tail:id});
 export const omsTradeListFromTo = (from,to)=> ({type:'omsTradeListFromTo', get:1, params:{from,to}});
 
+// don't need an error handler for anything, this will catch it
+export const omsApiCatchAllError        =  (errorMeta)=> ({type:'omsApiCatchAllError', errorMeta})
 
 export const omsVersionResponse         = (response, respMeta)=> ({type:'omsVersionResponse',  response, respMeta});
 export const omsVersionError            = (errorMeta)=> ({type:'omsVersionError', errorMeta});
