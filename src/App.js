@@ -11,6 +11,7 @@ import {umlHeartbeatSubscription,heartbeatXStateConfig} from './fsm-configs/subs
 import { useSelector } from './redux/use-selector';
 import {actions} from './redux/actions';
 import {aPartiesSelector, aQuotesSelector, aTradesSelector, selectors} from "./redux/selectors";
+import {isNumber} from "luxon/src/impl/util";
 
 const palette = {
       plum: '#4b54a1',
@@ -90,40 +91,58 @@ const gridMap = {
     Parties: 'aParties'
 };
 
+const secondsFormatter = (params)=>isNumber(params.value)? params.value.toFixed(2):undefined;
+
 
 let interval;
 const  App = (props) => {
-  const {left, right} = useSelector(s=>s.layout);
-  const gridChoice = useSelector(s=>s.gridChoice);
+  const {gridChoice, pollInterval, layout:{left,right}} = useSelector(s=>s);
   const {aTrades,aQuotes,aParties} = useSelector(selectors);
 
-  const rowDataPicker = {aTrades,aQuotes,aParties};
 
+  // useEffect(()=>{
+  //   const {omsTradeList, omsQuoteList, omsPartyList} = actions();
+  //   omsPartyList();
+  //   omsQuoteList();
+  //   omsTradeList();
+  // }, [])
+
+  // this necessarily  belong here but while transitioning out...
   useEffect(()=>{
     const {omsTradeList, omsQuoteList, omsPartyList} = actions();
-    omsPartyList();
-    omsQuoteList();
-    omsTradeList();
-  }, [])
+    const map = {Trades: omsTradeList, Quotes:omsQuoteList, Parties: omsPartyList}
+    const pollingAction = map[gridChoice];
+
+    clearInterval(interval);
+    setInterval(pollingAction, pollInterval);
+  }, [gridChoice, pollInterval])
 
 
-  const {pickGrid, omsTradeList, omsQuoteList, toggleLeft,toggleRight, omsVersion} = actions();
+  const rowDataPicker = {aTrades, aQuotes, aParties};
+
+
+  const {halveInterval, doubleInterval, pickGrid,  toggleLeft,toggleRight, omsVersion} = actions();
 
   const rowDataProp = gridChoice;
   const rowData = rowDataPicker[gridMap[rowDataProp]]||[];
 
   const columnDefs =  columnDefsMap[rowDataProp];
 
-  console.info(`props for grid are ${rowDataProp}`, columnDefs, rowData, aQuotes);
+  // console.info(`props for grid are ${rowDataProp}`, columnDefs, rowData, aQuotes);
 
 
    return  (
         <Layout left={left} right={right}>
             <Navbar>There is text here
 
-              <button onClick={()=>{pickGrid('Trades');  clearInterval(interval);setInterval(omsTradeList, 1000)}}>Trades</button>
-              <button onClick={()=>{pickGrid('Quotes'); clearInterval(interval); interval = setInterval(omsQuoteList, 1000)}}>Quotes</button>
-              <button onClick={()=>{pickGrid('Parties'); clearInterval(interval);}}>Parties</button>
+              <button onClick={()=>pickGrid('Trades')}>Trades</button>
+              <button onClick={()=>pickGrid('Quotes')}>Quotes</button>
+              <button onClick={()=>pickGrid('Parties')}>Parties</button>
+
+              Requesting data for: '{gridChoice}'
+              <button onClick={halveInterval}> Halve Interval</button>
+              Polling Interval is: {(pollInterval).toLocaleString('en-US')} milliseconds
+              <button onClick={doubleInterval}> Double Interval</button>
 
               // put some buttons here to switch the grid
                 <button onClick={()=>{toggleLeft(100)}}>Left</button>
