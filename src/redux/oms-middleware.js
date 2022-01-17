@@ -1,7 +1,5 @@
 import axios from 'axios';
 import {reqIdGenerate, elapsedSinceReqId} from "../utils/reqIdGenerator";
-import {omsApiCatchAllError} from "./action-funcs";
-// import {reqIdGenerate} from "../utils/reqIdGenerator";
 
 const middlestyle = `
     padding: 2px 8px;
