@@ -1,4 +1,4 @@
-import * as actionCreators from "./action-creators";
+import * as actionCreators from "../actions/original-creators";
 
 let _actions = undefined;
 
