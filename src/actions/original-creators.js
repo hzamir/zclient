@@ -1,8 +1,6 @@
 export const increment = (counter)=>({type:'Increment', counter});
 export const decrement = (counter)=>({type:'Decrement', counter});
 
-export const toggleRight = (expanded) =>({type: toggleRight.name, expanded});
-
 function makeActionCreator(type, ...argNames) {
   return function (...args) {
     const action = { type }
