@@ -1,5 +1,6 @@
 import {applyMiddleware} from "redux";
-import {getMiddleware, init} from "./example-redux-middleware";
+import {omsMiddleware, init} from "./oms-middleware";
+import {loggingMiddleware} from "./logging-middleware";
 
-export const middlewares = applyMiddleware(getMiddleware);
+export const middlewares = applyMiddleware(loggingMiddleware, omsMiddleware);
 export const middlewaresInit = init;

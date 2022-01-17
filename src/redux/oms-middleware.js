@@ -49,7 +49,7 @@ function createUrl(action, method) {
 
 const axiosConfig = { timeout: 30 };
 
-export const getMiddleware = store => next => action => {
+export const omsMiddleware = store => next => action => {
 
     const aType = action.type || '';
 
