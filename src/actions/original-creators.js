@@ -1,9 +1,6 @@
 export const increment = (counter)=>({type:'Increment', counter});
 export const decrement = (counter)=>({type:'Decrement', counter});
 
-export const pickGrid = (value)=>({type:'pickGrid', value});
-export const toggleLeft = (expanded) =>({type: toggleLeft.name, expanded});
-
 
 function makeActionCreator(type, ...argNames) {
   return function (...args) {
@@ -18,7 +15,6 @@ function makeActionCreator(type, ...argNames) {
 
 
 
-export const toggleRight = (expanded) =>({type: toggleRight.name, expanded});
 
 export const halveInterval = ()=>({type: halveInterval.name});
 export const doubleInterval =()=>({type: doubleInterval.name});

@@ -1,9 +1,9 @@
 // reselect code here
 import { createSelector } from "reselect";
 
-const tradesSelector    = s => s.trades;
-const partiesSelector   = s => s.parties;
-const quotesSelector    = s => s.quotes;
+const tradesSelector    = s => s.original.trades;
+const partiesSelector   = s => s.original.parties;
+const quotesSelector    = s => s.original.quotes;
 
 export const aTradesSelector  = createSelector(tradesSelector, o=>Object.values(o).slice(-100));
 export const aQuotesSelector  = createSelector(quotesSelector, o=>Object.values(o));

@@ -78,8 +78,6 @@ const Right = styled.section`
 `;
 
 
-const somejsx = <div>Hello<br/>There</div>;
-
 const closef=()=>console.warn('closing');
 
 
@@ -96,7 +94,9 @@ const secondsFormatter = (params)=>isNumber(params.value)? params.value.toFixed(
 
 let interval;
 const  App = (props) => {
-  const {gridChoice, pollInterval, layout:{left,right}} = useSelector(s=>s);
+  // useSelector got complex because we didn't compensate for adding slices
+  // resimplify after adding some types to make this easier
+  const { original:{pollInterval}, local: {gridChoice, layout:{left,right}}} = useSelector(s=>s);
   const {aTrades,aQuotes,aParties} = useSelector(selectors);
 
 
