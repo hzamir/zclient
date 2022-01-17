@@ -76,20 +76,46 @@ const closeRequest = (state, errorOrResponseMeta) => {
 
 //export const simpleValue = () => (state, action) => ({...state, [action.type]:action.value});
 
+// leave type parameter out of all the creators it will be added to match the key
+const creators = {
+  halveInterval:  ()=>({}),
+  doubleInterval: ()=>({}),
 
+
+
+  omsVersion:  ()=> ({}),
+  omsOrderBid:  (symbol,party,price,quantity)=> ({ post:'/order/bid', body:{symbol,party,price,quantity}}),
+  omsOrderAsk:  (symbol,party,price,quantity)=> ({ post:'/order/ask', body:{symbol,party,price,quantity}}),
+
+  omsPartyList:  ()=> ({      get:1}),
+  omsPartyLookup:  (id)=>({   get:1, tail:id}),
+  omsPartyCreate:  (id)=> ({  post:1, tail:id}),
+
+  omsQuoteList:  (id)=> ({ get:1}),
+
+  omsTradeList:  ()=> ({ get:1}),
+  omsTradeListSymbol:  (id)=> ({ get:'/trade/list', tail:id}),
+  omsTradeListFromTo:  (from,to)=> ({ get:1, params:{from,to}}),
+
+  // don't absolutely need an error handler for anything, this will catch it
+  omsApiCatchAllError: (errorMeta)=> ({ errorMeta}),
+
+  omsVersionResponse:  (response, respMeta)=> ({  response, respMeta}),
+  omsVersionError:  (errorMeta)=> ({ errorMeta}),
+
+  omsOrderBidResponse:  (response, respMeta)=> ({        response, respMeta}),
+  omsOrderAskResponse:  (response, respMeta)=> ({        response, respMeta}),
+  omsPartyListResponse:  (response, respMeta)=> ({       response, respMeta}),
+  omsPartyLookupResponse:  (response, respMeta)=> ({     response, respMeta}),
+  omsPartyCreateResponse:  (response, respMeta)=> ({     response, respMeta}),
+  omsQuoteListResponse:  (response, respMeta)=> ({       response, respMeta}),
+  omsTradeListResponse:  (response, respMeta)=> ({       response, respMeta}),
+  omsTradeListSymbolResponse:  (response, respMeta)=> ({ response, respMeta}),
+  omsTradeListFromToResponse:  (response, respMeta)=> ({ response, respMeta}),
+
+};
 
 const reducers = {
-  Increment: (state, {counter}) =>
-  {
-    const val = state[counter] + 1;
-    return  {...state, [counter]:val}
-  },
-
-  Decrement: (state, {counter}) =>
-  {
-    const val = state[counter] - 1;
-    return  {...state, [counter]:val}
-  },
   halveInterval: s =>{
     let {pollInterval: iv} =s;
     iv = iv < 50? iv: iv * 0.5;
@@ -127,8 +153,6 @@ const reducers = {
   omsTradeListSymbolResponse:  (state,{response,respMeta})=>state,
   omsTradeListFromToResponse:  (state,{response,respMeta})=>state,
 
-
-
   omsQuoteListResponse: stateProducer('quotes', 'name'),
   omsTradeListResponse: stateProducer('trades', 'sequence'),
   omsPartyListResponse: stateProducer('parties', 'name'),
@@ -140,6 +164,6 @@ const reducers = {
 };
 
 
-export const sliceConfig = {name: "original", initialState, reducers};
+export const sliceConfig = {name: "original", initialState, creators, reducers};
 
 
