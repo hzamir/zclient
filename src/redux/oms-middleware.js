@@ -45,7 +45,7 @@ function createUrl(action, method) {
     return `${baseUrl}${path}${tailPath}`;
 }
 
-const axiosConfig = { timeout: 30 };
+const axiosConfig = { timeout: 1000 };
 
 export const omsMiddleware = store => next => action => {
 
