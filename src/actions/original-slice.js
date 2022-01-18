@@ -76,42 +76,46 @@ const closeRequest = (state, errorOrResponseMeta) => {
 
 //export const simpleValue = () => (state, action) => ({...state, [action.type]:action.value});
 
+
+const getter = {get:1};
+const noParams = {};
+const responseAction = (response, respMeta)=> ({ response, respMeta});
+
 // leave type parameter out of all the creators it will be added to match the key
+// creators can be objects or functions, neither needs to return a type
+// functions will be decorated with functions that set the type
+// objects will be replaced with objects that have the type set
 const creators = {
-  halveInterval:  ()=>({}),
-  doubleInterval: ()=>({}),
+  halveInterval:  noParams,
+  doubleInterval: noParams,
+  omsVersion:     noParams,
 
-
-
-  omsVersion:  ()=> ({}),
   omsOrderBid:  (symbol,party,price,quantity)=> ({ post:'/order/bid', body:{symbol,party,price,quantity}}),
   omsOrderAsk:  (symbol,party,price,quantity)=> ({ post:'/order/ask', body:{symbol,party,price,quantity}}),
 
-  omsPartyList:  ()=> ({      get:1}),
+  omsPartyList:  getter,
   omsPartyLookup:  (id)=>({   get:1, tail:id}),
   omsPartyCreate:  (id)=> ({  post:1, tail:id}),
+  omsQuoteList:    (id)=> ({ get:1}),
 
-  omsQuoteList:  (id)=> ({ get:1}),
-
-  omsTradeList:  ()=> ({ get:1}),
-  omsTradeListSymbol:  (id)=> ({ get:'/trade/list', tail:id}),
-  omsTradeListFromTo:  (from,to)=> ({ get:1, params:{from,to}}),
+  omsTradeList: getter,
+  omsTradeListSymbol:          (id)=> ({ get:'/trade/list', tail:id}),
+  omsTradeListFromTo:          (from,to)=> ({ get:1, params:{from,to}}),
 
   // don't absolutely need an error handler for anything, this will catch it
-  omsApiCatchAllError: (errorMeta)=> ({ errorMeta}),
+  omsApiCatchAllError:         (errorMeta)=> ({ errorMeta}),
+  omsVersionError:             (errorMeta)=> ({ errorMeta}),
 
-  omsVersionResponse:  (response, respMeta)=> ({  response, respMeta}),
-  omsVersionError:  (errorMeta)=> ({ errorMeta}),
-
-  omsOrderBidResponse:  (response, respMeta)=> ({        response, respMeta}),
-  omsOrderAskResponse:  (response, respMeta)=> ({        response, respMeta}),
-  omsPartyListResponse:  (response, respMeta)=> ({       response, respMeta}),
-  omsPartyLookupResponse:  (response, respMeta)=> ({     response, respMeta}),
-  omsPartyCreateResponse:  (response, respMeta)=> ({     response, respMeta}),
-  omsQuoteListResponse:  (response, respMeta)=> ({       response, respMeta}),
-  omsTradeListResponse:  (response, respMeta)=> ({       response, respMeta}),
-  omsTradeListSymbolResponse:  (response, respMeta)=> ({ response, respMeta}),
-  omsTradeListFromToResponse:  (response, respMeta)=> ({ response, respMeta}),
+  omsVersionResponse:          responseAction,
+  omsOrderBidResponse:         responseAction,
+  omsOrderAskResponse:         responseAction,
+  omsPartyListResponse:        responseAction,
+  omsPartyLookupResponse:      responseAction,
+  omsPartyCreateResponse:      responseAction,
+  omsQuoteListResponse:        responseAction,
+  omsTradeListResponse:        responseAction,
+  omsTradeListSymbolResponse:  responseAction,
+  omsTradeListFromToResponse:  responseAction,
 
 };
 
