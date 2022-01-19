@@ -1,4 +1,4 @@
-import {sliceConfig as originalSlice}  from "../actions/original-slice";
+import {sliceConfig as omsSlice}  from "../actions/oms-slice";
 import {sliceConfig as localSlice} from "../actions/local-slice";
 import {sliceConfig as controlSlice} from "../actions/control-slice";
 
@@ -15,7 +15,7 @@ const addTypeToCreatorObject = (k, v) =>{ const creator = {type: k, ...v}; retur
 
 
 // list of all actions to define
-const allSlices = [originalSlice, localSlice, controlSlice];
+const allSlices = [omsSlice, localSlice, controlSlice];
 
 // given all the slices, we need an array of [{name, unboundActions}] which we will later process into a map of {slicename: boundActions} or slicename.actionName
 

@@ -44,6 +44,7 @@ const axiosConfig = { timeout: 1000 };
 
 const sliceName = 'oms';
 
+// todo better way to make middleware act only on its slice
 export const omsMiddleware = store => next => action => {
 
     const aType = action.type || '';

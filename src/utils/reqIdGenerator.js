@@ -13,6 +13,8 @@ const formatCtr    = v=>v.toLocaleString('en-US', fmtCtr);
 
 const timeOrigin = formatOrigin(performance.timeOrigin);
 
+export const minisession = timeOrigin
+
 const dateTimeFmt = "yyyy-MM-dd HH:mm:ss.SSS";
 
 const reqIdRegEx = /#(?<origin>[0-9a-z]{11})\+(?<now>[0-9,.]{15})=(?<counter>[0-9,]{7})/;
