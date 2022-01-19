@@ -5,7 +5,7 @@ import {Inflate} from "./utils/inflate";
 // get the relevant classes registered for injection with an import
 import './fsm-utils/test-class';
 import './index.css';
-import {connectRootComponent} from './redux/connect-react-app-to-redux';
+import {connectRootComponent} from './actions-integration';
 import {default as App} from './App';
 import {render} from "react-dom";
 import React from "react";

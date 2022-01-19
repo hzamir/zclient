@@ -8,34 +8,29 @@ const middlestyle = `
     color: black;
     `;
 
-let _actions = undefined;
 
-//  we will need to launch actions on API returns
-export const init = (actions) =>
+ let omsActions = undefined;
+
+//  this middleware needs access to other actions
+export const omsMiddlewareInit = (actions) =>
 {
-    _actions = actions;
-};
-
-export const crementMiddleWare = store => next => action => {
-    const aType = action.type || '';
-
-    if(aType.endsWith('crement'))
-    {
-        console.log(`%c ${aType}`, middlestyle);
-    }
-
-    next(action);
+    omsActions = actions.oms; // there must be an oms slice
 };
 
 
-
+// this should be included in initialization
 const baseUrl = 'http://localhost:5000';
 
 
 const camelCaseRegEx = /([a-z0-9]|(?=[A-Z]))([A-Z])/g;
+
+const slicePrefixLen = 'oms/'.length; // length of sliceName + delimiter
+const prefixPlusOmsLen = slicePrefixLen + 'oms'.length; // length of slicePrefix, plus omsPrefix
+
 function omsTypeToPath(atype) {
-    const camelCased=atype.slice(3); // remove first three letters
+    const camelCased=atype.slice(prefixPlusOmsLen)
     return camelCased.replace(camelCaseRegEx, '$1/$2').toLowerCase();
+    //..todo now this breaks the response mapping somehow
 }
 
 function createUrl(action, method) {
@@ -47,11 +42,13 @@ function createUrl(action, method) {
 
 const axiosConfig = { timeout: 1000 };
 
+const sliceName = 'oms';
+
 export const omsMiddleware = store => next => action => {
 
     const aType = action.type || '';
 
-    const startsWithOms = aType.startsWith('oms');
+    const startsWithOms = aType.startsWith(`${sliceName}/`);
     const isResponse = startsWithOms && (aType.endsWith('Response') || aType.endsWith('Error'));  // all errors here are exceptions in this case
     //
     let reqId;
@@ -60,8 +57,8 @@ export const omsMiddleware = store => next => action => {
     {
         const reqId = reqIdGenerate(); // generate a unique request identifier
 
-        const rAction = aType+'Response';
-        const eAction = aType+'Error';
+        const rAction = (aType+'Response').slice(slicePrefixLen); // take off the prefix since we are exporting symbols in flat space no prefix
+        const eAction = (aType+'Error').slice(slicePrefixLen);
 
         const responsef = (response)=> {
 
@@ -70,8 +67,13 @@ export const omsMiddleware = store => next => action => {
             const {elapsedMicros, elapsedStr:elapsed} = elapsedSinceReqId(performance.now(), reqId);
 
             const respMeta = { reqId, elapsed, elapsedMicros };
-            _actions[rAction](response, respMeta);
 
+            try {
+                omsActions[rAction](response, respMeta);
+            } catch(err) {
+                console.error(`response action error`, rAction, omsActions);  // the issue is that the actions are not renamed when exported
+                throw new Error(`omsActions.${rAction}`);
+            }
 
         }
         const catchf    = (error)=> {
@@ -85,7 +87,7 @@ export const omsMiddleware = store => next => action => {
 
             // run either specific or generic api error handler
 
-            (_actions[eAction] ?? _actions['omsApiCatchAllError'])(errorMeta);
+            (omsActions[eAction] ?? omsActions['omsApiCatchAllError'])(errorMeta);
         };
 
         const method = action.post? 'post': 'get';

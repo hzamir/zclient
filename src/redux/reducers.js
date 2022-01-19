@@ -1,10 +1,14 @@
 import {combineReducers} from "redux";
 import {oReduce} from "../utils/oreduce";
+
 import {sliceConfig as originalSlice}  from "../actions/original-slice";
 import {sliceConfig as localSlice} from "../actions/local-slice";
+import {sliceConfig as controlSlice} from "../actions/control-slice";
 
 const createReducer = sliceConfig => {
-  const {initialState, reducers:funcs} = sliceConfig;
+  const {initialState, reducers} = sliceConfig;
+
+  const funcs = oReduce(Object.entries(reducers), ([k,v])=>[`${sliceConfig.name}/${k}`, v]);
 
   return function(state = initialState, action)
   {
@@ -13,7 +17,7 @@ const createReducer = sliceConfig => {
   }
 }
 
-const slices = [originalSlice,localSlice];
+const slices = [originalSlice,localSlice, controlSlice];
 
 // if defining more than one reducer, then combine them here  and return that instead as "reducer"
 //const rootReducer = combineReducers({myreducer }); // combining reducers not necessary here

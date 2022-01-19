@@ -1,9 +1,10 @@
 // reselect code here
 import { createSelector } from "reselect";
+//todo import the total state from here
 
-const tradesSelector    = s => s.original.trades;
-const partiesSelector   = s => s.original.parties;
-const quotesSelector    = s => s.original.quotes;
+const tradesSelector    = s => s.oms.trades;
+const partiesSelector   = s => s.oms.parties;
+const quotesSelector    = s => s.oms.quotes;
 
 export const aTradesSelector  = createSelector(tradesSelector, o=>Object.values(o).slice(-100));
 export const aQuotesSelector  = createSelector(quotesSelector, o=>Object.values(o));
