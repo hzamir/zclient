@@ -3,8 +3,7 @@ import {composeWithDevTools} from "redux-devtools-extension";
 import { Provider, useSelector as reduxUseSelector } from "react-redux";
 
 
-import {reducer} from "../redux/reducers";
-import {actionsInit} from "../redux/actions";
+import {reducer, actionsInit} from "../redux/reducers-and-actions";
 
 
 import {omsMiddleware, omsMiddlewareInit} from "../actions/oms-middleware";
