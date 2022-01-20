@@ -2,6 +2,8 @@ import {sliceConfig as omsSlice}  from "../actions/oms-slice";
 import {sliceConfig as localSlice} from "../actions/local-slice";
 import {sliceConfig as controlSlice} from "../actions/control-slice";
 import {sliceConfig as requestSlice} from "../actions/request-slice";
+import {sliceConfig as notifySlice} from "../actions/notify-slice";
+
 
 import {oReduce} from "../utils/oreduce";
 import {combineReducers} from "redux";  // todo this is a redux dependency
@@ -35,7 +37,7 @@ function validateAllSlices(allSlices)
 
 
 // list of all actions to define
-const allSlices = [omsSlice, localSlice, controlSlice,  requestSlice];
+const allSlices = [omsSlice, localSlice, controlSlice,  requestSlice, notifySlice];
 
 
 let combinedReducers, allCreatorsArr;

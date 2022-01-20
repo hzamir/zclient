@@ -97,9 +97,13 @@ let interval;
 const  App = (props) => {
   // useSelector got complex because we didn't compensate for adding slices
   // resimplify after adding some types to make this easier
-  const { control:{pollInterval}, local: {gridChoice, layout:{left,right}}} = useSelector(s=>s);
-  const {aTrades,aQuotes,aParties} = useSelector(selectors);
+  const {
+    control:  {pollInterval},
+    local:    {gridChoice, layout:   {left,right}},
+    notify:   {notices:[notice=undefined]}
+    } = useSelector(s=>s);
 
+  const {aTrades,aQuotes,aParties} = useSelector(selectors);
 
   // useEffect(()=>{
   //   const {omsTradeList, omsQuoteList, omsPartyList} = actions;
@@ -125,7 +129,7 @@ const  App = (props) => {
   const {halveInterval, doubleInterval} = actions.control;
   const { pickGrid,  toggleLeft, toggleRight, } = actions.local;
   const {omsVersion} = actions.oms;
-
+  const {info,warn,error,fatal} = actions.notify;
 
   const rowDataProp = gridChoice;
   const rowData = rowDataPicker[gridMap[rowDataProp]]||[];
@@ -143,22 +147,32 @@ const  App = (props) => {
               <button onClick={()=>pickGrid('Quotes')}>Quotes</button>
               <button onClick={()=>pickGrid('Parties')}>Parties</button>
 
+              <button onClick={()=>fatal({msg:'I am fatal'})}>Fatal Message</button>
+              <button onClick={()=>error({msg:'Seen one error'})}>Error Message</button>
+              <button onClick={()=>warn({msg:'This is a warning'})}>Warning</button>
+
               Requesting data for: '{gridChoice}'
               <button onClick={halveInterval}> Halve Interval</button>
               Polling Interval is: {(pollInterval).toLocaleString('en-US')} milliseconds
               <button onClick={doubleInterval}> Double Interval</button>
 
               // put some buttons here to switch the grid
-                <button onClick={()=>{toggleLeft(100)}}>Left</button>
-                <button onClick={()=>{toggleRight(300)}}>Right</button>
-                <button onClick={omsVersion}>OMS Version</button>
+              <button onClick={()=>{toggleLeft(100)}}>Left</button>
+              <button onClick={()=>{toggleRight(300)}}>Right</button>
+              <button onClick={omsVersion}>OMS Version</button>
               <button onClick={()=>{omsVersion();omsVersion();omsVersion();omsVersion();omsVersion();omsVersion()}}>OMS Version Bomb</button>
-
 
             </Navbar>
             <Left>In left side bar?</Left>
 
-          <CenterBody><MyGrid rowData={rowData} columnDefs={columnDefs}/></CenterBody>
+
+          <CenterBody>
+            {notice && notice.level === 'fatal'?
+              <Ladom content={notice.msg}/>
+                :
+                <MyGrid rowData={rowData} columnDefs={columnDefs}/>
+            }
+          </CenterBody>
 
           {/*<CenterBody>*/}
           {/*    <textarea readOnly={true} value={umlHeartbeatSubscription}/>*/}
