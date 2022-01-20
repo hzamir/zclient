@@ -129,7 +129,7 @@ const  App = (props) => {
   const {halveInterval, doubleInterval} = actions.control;
   const { pickGrid,  toggleLeft, toggleRight, } = actions.local;
   const {omsVersion} = actions.oms;
-  const {info,warn,error,fatal} = actions.notify;
+  const {info,warn,error,fatal,dismiss} = actions.notify;
 
   const rowDataProp = gridChoice;
   const rowData = rowDataPicker[gridMap[rowDataProp]]||[];
@@ -149,7 +149,7 @@ const  App = (props) => {
 
               <button onClick={()=>fatal({msg:'I am fatal'})}>Fatal Message</button>
               <button onClick={()=>error({msg:'Seen one error'})}>Error Message</button>
-              <button onClick={()=>warn({msg:'This is a warning'})}>Warning</button>
+              <button onClick={()=>warn({msg:'This is a warning with Dismiss as a remedy', remedy:'Dismiss'})}>Warning</button>
 
               Requesting data for: '{gridChoice}'
               <button onClick={halveInterval}> Halve Interval</button>
@@ -168,9 +168,12 @@ const  App = (props) => {
 
           <CenterBody>
             {notice && notice.level === 'fatal'?
-              <Ladom content={notice.msg}/>
+              <Ladom content={notice.msg} noClose/>
                 :
-                <MyGrid rowData={rowData} columnDefs={columnDefs}/>
+              (notice && notice.remedy === 'Dismiss')?
+                <Ladom content={notice.msg} close={()=>{dismiss(notice.key)}}/>
+
+                :<MyGrid rowData={rowData} columnDefs={columnDefs}/>
             }
           </CenterBody>
 

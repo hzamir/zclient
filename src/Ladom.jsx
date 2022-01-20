@@ -68,12 +68,12 @@ export class Ladom extends React.Component {
 
   render() {
    const {nada,closeIt,setRef} = this;
-   const {content, outsideClose=false, close=nada} = this.props;
+   const {content, outsideClose=false, close=nada, noClose=false} = this.props;
 
     return(
     <ModalBackdrop ref={setRef} onClick={outsideClose?()=>{closeIt();close()}:nada}>
       <ModalContent onClick={nada}>
-        <Close onClick={closeIt}>&times;</Close>
+        {noClose?null:<Close onClick={()=>{closeIt();close()}}>&times;</Close>}
         {content}
       </ModalContent>
     </ModalBackdrop>

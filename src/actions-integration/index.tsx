@@ -5,16 +5,16 @@ import { Provider, useSelector as reduxUseSelector } from "react-redux";
 
 import {reducer, actionsInit} from "../redux/reducers-and-actions";
 
-
 import {omsMiddleware, omsMiddlewareInit} from "../actions/oms-middleware";
 import {loggingMiddleware} from "../actions/logging-middleware";
+import {fatalMiddleware} from '../actions/fatal-middleware';
 
 
 import React from "react";
 
 
 //----- combine middlewares -----
-const middlewares = applyMiddleware(omsMiddleware, loggingMiddleware); // make logging last to not record intercepted actions
+const middlewares = applyMiddleware(fatalMiddleware, omsMiddleware, loggingMiddleware); // make logging last to not record intercepted actions
 
 
 //----- reducer section -----
