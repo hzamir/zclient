@@ -17,7 +17,7 @@ export const minisession = timeOrigin
 
 const dateTimeFmt = "yyyy-MM-dd HH:mm:ss.SSS";
 
-const reqIdRegEx = /#(?<origin>[0-9a-z]{11})\+(?<now>[0-9,.]{15})=(?<counter>[0-9,]{7})/;
+const reqIdRegEx = /(#|@)(?<origin>[0-9a-z]{11})\+(?<now>[0-9,.]{15})=(?<counter>[0-9,]{7})/;
 
 const ignoreRegex = /(,|\.)/g;
 
@@ -106,8 +106,13 @@ export function elapsedSinceReqId(tsMicros, reqId)
 export function reqIdGenerate()
 {
     const id =  `#${timeOrigin}+${formatNow(performance.now())}=${formatCtr(++requestCounter)}`;
-    // const desc = describeReqId(id);
-    // console.warn(`id = ${id}`, desc);
+    return id;
+}
 
+// use internal identifiers to track async operations not sent as external requests
+// these differ only in the prefix @ vs #
+export function internalIdGenerate()
+{
+    const id =  `@${timeOrigin}+${formatNow(performance.now())}=${formatCtr(++requestCounter)}`;
     return id;
 }
