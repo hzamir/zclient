@@ -10,12 +10,14 @@ const middlestyle = `
     `;
 
 
- let omsActions = undefined;
+ let omsActions;
+ let requestActions;
 
 //  this middleware needs access to other actions
 export const omsMiddlewareInit = (actions) =>
 {
     omsActions = actions.oms; // there must be an oms slice
+    requestActions = actions.request;
 };
 
 
@@ -64,6 +66,7 @@ const response = (rAction, reqId, response) => {
 
     try {
         omsActions[rAction](response, respMeta);
+        requestActions.closeRequestR(respMeta);
     } catch(err) {
         console.error(`response action error`, rAction, omsActions);  // the issue is that the actions are not renamed when exported
         throw new Error(`omsActions.${rAction}`);
@@ -80,8 +83,8 @@ const catchResponse =   (eAction, reqId,  error)=> {
     console.error(`${eAction} reqId:${reqId} exception after: ${elapsed}`, errorMeta);
 
     // run either specific or generic api error handler
-
     (omsActions[eAction] ?? omsActions['omsApiCatchAllError'])(errorMeta);
+    requestActions.closeRequestE(errorMeta);
 };
 
 
@@ -119,7 +122,9 @@ export const omsMiddleware = store => next => action => {
             else
                 axios.get(url, axiosConfig).then(responsef).catch(catchf);
     }
-    return next({...action,reqId, url}); // decorate action with reqId and url, actions will record it
+    requestActions.openRequest({...action,reqId, url});
+    // do not call next, substitute the openRequest action (the close will fail however
+   // return next({...action,reqId, url}); // decorate action with reqId and url, actions will record it
 
 
 };

@@ -1,19 +1,14 @@
-import {RequestState, ErrorMeta, ResponseMeta, openRequest, closeRequest, initialState as initialRequestState} from './request-slice';
-
 interface OmsInfo { version: string; }
-export interface OmsState extends RequestState {
-  user: 'yoyo',
-  pollInterval: 1_073_741_824, // a big power of two, to start
-  omsInfo: OmsInfo,
-  parties: Record<any,any>,
-  quotes: Record<any,any>,
-  trades: Record<any,any>,
+export interface OmsState {
+  user: string;
+  omsInfo: OmsInfo;
+  parties: Record<any,any>; // these are bad types
+  quotes: Record<any,any>;
+  trades: Record<any,any>;
 }
 
 const initialState:OmsState = {
-  ...initialRequestState,    // temporary fix on way to separating concerns
   user: 'yoyo',
-  pollInterval: 1_073_741_824, // a big power of two, to start
   omsInfo: {version: '*unknown*'},
   parties: {},
   quotes: {},
@@ -23,7 +18,7 @@ const initialState:OmsState = {
 
 type OmsCreator = (s:OmsState,...rest: any)=>unknown;
 type OmsCreators = Record<string, OmsCreator|{}>;
-type OmsReducer = (s:OmsState,...rest: any)=>RequestState|OmsState;
+type OmsReducer = (s:OmsState,...rest: any)=>OmsState;
 type OmsReducers = Record<string, OmsReducer>;
 
 interface SliceConfig {
@@ -52,8 +47,7 @@ function stateProducer(propName:string, keyField:string) {
 
   return function(state:any, {response, respMeta}:any) {
     const result = response.data.reduce(extractorf, {});
-    const closeRequestChanges = closeRequest(state, respMeta);
-    return {...state, [propName]:result, ...closeRequestChanges};
+    return {...state, [propName]:result};
   }
 }
 
@@ -65,7 +59,7 @@ function stateProducer(propName:string, keyField:string) {
 
 const getter = {get:1};
 const noParams = {};
-const responseAction = (response:any, respMeta:ResponseMeta)=> ({ response, respMeta});
+const responseAction = (response:any)=> ({ response});
 
 // leave type parameter out of all the creators it will be added to match the key
 // creators can be objects or functions, neither needs to return a type
@@ -87,8 +81,8 @@ const creators:OmsCreators = {
   omsTradeListFromTo:          (from:any, to:any)=> ({ get:1, params:{from,to}}),
 
   // don't absolutely need an error handler for anything, this will catch it
-  omsApiCatchAllError:         (errorMeta:ErrorMeta)=> ({ errorMeta}),
-  omsVersionError:             (errorMeta:ErrorMeta)=> ({ errorMeta}),
+  omsApiCatchAllError:         noParams,
+  omsVersionError:             noParams,
 
   omsVersionResponse:          responseAction,
   omsPartyListResponse:        responseAction,
@@ -104,24 +98,25 @@ const creators:OmsCreators = {
 
 };
 
+const nullReducer = (state:OmsState)=>state;
+
 const reducers:OmsReducers = {
-  omsVersion:      (state, action)=> openRequest(state, action), // action must have reqId and url set by middleware
-  omsOrderBid:     (state, action)=> openRequest(state, action),
-  omsOrderAsk:     (state, action)=> openRequest(state, action),
-  omsPartyList:    (state, action)=> openRequest(state, action),
-  omsPartyLookup:  (state,action)=>openRequest(state, action),
-  omsPartyCreate:  (state,action)=>openRequest(state, action),
-  omsQuoteList:    (state,action)=>openRequest(state, action),
+  omsVersion:         nullReducer,  // todo these reducers shouldn't be reachable anyway, middleware replaces them
+  omsOrderBid:        nullReducer,
+  omsOrderAsk:        nullReducer,
+  omsPartyList:       nullReducer,
+  omsPartyLookup:     nullReducer,
+  omsPartyCreate:     nullReducer,
+  omsQuoteList:       nullReducer,
 
-  omsTradeList:    (state,action)=>openRequest(state, action),
-  omsTradeListSymbol:  (state,action)=>openRequest(state, action),
-  omsTradeListFromTo:  (state,action)=>openRequest(state, action),
+  omsTradeList:       nullReducer,
+  omsTradeListSymbol: nullReducer,
+  omsTradeListFromTo: nullReducer,
 
-  omsVersionResponse: (state,{response,respMeta})=>({...state, omsInfo:{version:response.data}, ...closeRequest(state,respMeta)}),
+  omsVersionResponse: (state,{response})=>({...state, omsInfo:{version:response.data}}),
 
-  omsApiCatchAllError: (state,{errorMeta})=>({...state, ...closeRequest(state,errorMeta)}),  // todo add error for closing request
-
-  omsVersionError: (state,{errorMeta})=>({...state, ...closeRequest(state,errorMeta)}),  // todo add error for closing request
+  omsApiCatchAllError: (state)=>state,  // let middleware handle this
+  omsVersionError: (state)=>state,  // let middleware handle this
 
   // omsOrderBidResponse: (state,{response,respMeta})=>state,
   // omsOrderAskResponse: (state,{response,respMeta})=>state,

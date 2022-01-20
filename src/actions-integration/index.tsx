@@ -14,7 +14,7 @@ import React from "react";
 
 
 //----- combine middlewares -----
-const middlewares = applyMiddleware(loggingMiddleware, omsMiddleware);
+const middlewares = applyMiddleware(omsMiddleware, loggingMiddleware); // make logging last to not record intercepted actions
 
 
 //----- reducer section -----

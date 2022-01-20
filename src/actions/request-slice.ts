@@ -54,7 +54,7 @@ export const initialState:RequestState = {
 };
 
 
-type Creator = (s:RequestState,...rest: any)=>unknown;
+type Creator = (...rest: any)=>unknown;
 type Creators = Record<string, Creator|{}>;
 type Reducer = (s:RequestState,...rest: any)=>RequestState;
 type Reducers = Record<string, Reducer>;
@@ -66,19 +66,8 @@ interface SliceConfig {
   initialState: RequestState;
 }
 
-
-
-
-// a utility that that implements any action that implies making an api call tracing it to completion
-export const openRequest = (state:RequestState, {type, reqId, url}:OpenRequestP):RequestState => ({
-  ...state,
-  openRequestCount: state.openRequestCount+1,
-  openRequests: {...state.openRequests, [reqId]: {reqId, type, url, when: describeReqId(reqId)}},
-  maxOpenRequestCount: Math.max(state.maxOpenRequestCount, state.openRequestCount+1)
-});
-
 // close any request does not return entire state, is folded into other reponses
-export const closeRequest = (state:RequestState, errorOrResponseMeta: ErrorMeta | ResponseMeta) :RequestState => {
+const closeRequest = (state:RequestState, errorOrResponseMeta: ErrorMeta | ResponseMeta) :RequestState => {
 
   const { reqId, elapsed, elapsedMicros, name=undefined, message=undefined, stack=undefined} = errorOrResponseMeta as any; // any here simplfies
 
@@ -98,28 +87,27 @@ export const closeRequest = (state:RequestState, errorOrResponseMeta: ErrorMeta 
 };
 
 
-
-
-const responseAction = (meta:ResponseMeta|ErrorMeta)=> ({meta});
-
-
 // leave type parameter out of all the creators it will be added to match the key
 // creators can be objects or functions, neither needs to return a type
 // functions will be decorated with functions that set the type
 // objects will be replaced with objects that have the type set
 const creators:Creators = {
-  openRequest: {},
-  closeRequest: responseAction
-
-
+  openRequest: ({reqId, url})=>({reqId, url}),
+  closeRequestR: (respMeta)=>({respMeta}),
+  closeRequestE: (errorMeta)=>({errorMeta})
 };
 
 const reducers:Reducers = {
-  openRequest:     (state, action)=>openRequest(state, action),
-  closeRequestR:    (state, {respMeta})=>closeRequest(state, respMeta),
-  closeRequestE:(state, {errorMeta})=>closeRequest(state, errorMeta),
+  closeRequestR:  (state, {respMeta})=>closeRequest(state, respMeta),
+  closeRequestE:  (state, {errrorMeta})=>closeRequest(state, errrorMeta),
+  openRequest:     (state:RequestState, {type, reqId, url}:OpenRequestP)=> ({
+    ...state,
+    openRequestCount: state.openRequestCount+1,
+    openRequests: {...state.openRequests, [reqId]: {reqId, type, url, when: describeReqId(reqId)}},
+    maxOpenRequestCount: Math.max(state.maxOpenRequestCount, state.openRequestCount+1)
+  }),
 };
 
 
-export const sliceConfig:SliceConfig = {name: "request", initialState, creators, reducers};
+export const sliceConfig:SliceConfig = {name: 'request', initialState, creators, reducers};
 
