@@ -120,7 +120,7 @@ const  App = (props) => {
     const pollingAction = map[gridChoice];
 
     clearInterval(interval);
-    setInterval(pollingAction, pollInterval);
+    interval = setInterval(pollingAction, pollInterval);
   }, [gridChoice, pollInterval])
 
 
