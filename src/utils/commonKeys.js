@@ -1,5 +1,17 @@
 export const commonKeys = (a, b) => Object.keys(a).filter({}.hasOwnProperty.bind(b));
 
+// todo very inefficient for now but just need something working
+export const identicalKeys = (a,b) => {
+  const aLen = Object.keys(a).length;
+  const bLen = Object.keys(b).length;
+  return (aLen === bLen) && commonKeys(a,b).length === aLen;
+}
+
+function objectsHaveSameKeys(...objects) {
+  const allKeys = objects.reduce((keys, object) => keys.concat(Object.keys(object)), []);
+  const union = new Set(allKeys);
+  return objects.every(object => union.size === Object.keys(object).length);
+}
 
 const oA = {a:1, b:2, c:3};
 const oB = {x:1, y:0, z:0 };

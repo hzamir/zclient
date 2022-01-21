@@ -6,7 +6,8 @@ import {sliceConfig as notifySlice} from "../actions/notify-slice";
 
 
 import {oReduce} from "../utils/oreduce";
-import {combineReducers} from "redux";  // todo this is a redux dependency
+import {combineReducers} from "redux";
+import {identicalKeys} from "../utils/commonKeys";  // todo this is a redux dependency
 
 // reason to combine a console statement has to do with exceptions thrown while just loading a module
 // making reading the causing exception completely unreliable in the log until that pattern is fixed
@@ -18,21 +19,38 @@ function throwIt(s, err)
   throw(error);
 }
 
+
+
+function validateSlice(slice)
+{
+    const identicallyKeyed = identicalKeys(slice.creators, slice.reducers);
+    console.log(`validating slice ${slice.name}`);
+
+    if(!identicallyKeyed)
+      throwIt(`Slice ${slice.name} does not have identical set of creators and reducers`); // todo better detail later
+}
 // test combined set of slices for unique names, valid slice names, correctness, etc.
 function validateAllSlices(allSlices)
 {
+  // --- slice name police ---
+  // --- must have unique names ----
+
   const allSliceNames = allSlices.map(({name})=>name);
   const uniqueSliceNames = new Set(allSliceNames);
   if(uniqueSliceNames.size !== allSlices.length)
     throwIt(`Not all slices have unique names (${allSliceNames.join(',')})`);
 
+  // ---- slice names must look like basic identifiers starting with lower case letter preferably camel case
   const legalSliceNameRegEx = /^[a-z]+[a-zA-Z0-9_]*$/;
-
   allSliceNames.forEach(name=>{
     const isLegal = legalSliceNameRegEx.test(name)
     if(!isLegal)
       throwIt(`Slice '${name}' does not conform to pattern ${legalSliceNameRegEx.toString()}`)
   });
+
+  //---- verify there is a creator for every reducer ----
+  allSlices.forEach(validateSlice);
+
 }
 
 
