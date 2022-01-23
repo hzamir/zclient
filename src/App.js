@@ -15,8 +15,6 @@ import {actions, useSelector} from './actions-integration';
 import {aPartiesSelector, aQuotesSelector, aTradesSelector, selectors} from "./actions/selectors";
 
 import {isNumber} from "luxon/src/impl/util";
-import {DateTime} from "luxon";
-import {TIME_24_WITH_SECONDS} from "luxon/src/impl/formats";
 
 const palette = {
       plum: '#4b54a1',
