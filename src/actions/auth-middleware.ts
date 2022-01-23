@@ -44,7 +44,7 @@ function createUrl(tType:string, action:AuthAction) {
   // todo inject specific domains for environment here
   const subdomain   = tType === 'refresh'? 'auth': 'appdev'; //
   const apiCategory = tType === 'refresh'? 'jwt': 'v1/auth';
-  const specificApi = tType === typeToPath(tType);
+  const specificApi = typeToPath(tType);
   const tailPath = action.tail? '/'+action.tail:'';
 
   return `https://${subdomain}.prometheusalts.com/api/${apiCategory}/${specificApi}${tailPath}`
@@ -131,7 +131,7 @@ function refreshToken(refreshToken:string, responsef:ResponseF, catchf:CatchF)
 
 const triggersApi = (aType:string, sliceName:string) =>
   aType.startsWith(`${sliceName}/`) &&
-  !(aType.endsWith('Response') || aType.endsWith('Error'))
+  !(aType.endsWith('Response') || aType.endsWith('Error') || aType.endsWith('Exception'))
 
 // todo better way to make middleware act only on its slice
 export const authMiddleware = (store:any) => (next:NextF) => (a:Action) => {

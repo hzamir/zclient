@@ -11,17 +11,6 @@ export interface AuthAction extends Action {
   body: any
 }
 
-  // the reqId is actually added later by middleware
-  const aCreate = ()=>({reqId: ''});  // all api calls have reqId generated here, then where can middleware get it from? header?
-
-  // creators don't need to satisfy type
-  const creators = {
-    refreshToken: (refreshToken:string)=>({body:{refreshToken}}),               // refresh token will be called only by middleware with the refreshToken from state
-    omsApiCatchAllError:  noParamsCreator,
-
-    login:         (email:string, password:string)=>({body:{email,password}}),  // put it into body
-    loginIdp:     aCreate,  // implement later
-  };
 
 // authType as categorized by claims (more detailed than a higher level type we might use
 export type ClaimAuthType = 'PASSWORD'|'ONE_TIME_PASSWORD'|'PASSWORDLESS'|     // local logins
@@ -108,8 +97,36 @@ const reducers:AuthReducers = {
   loginIdp: s=>s,
 };
 
+// the reqId is actually added later by middleware
+const aCreate = ()=>({reqId: ''});  // all api calls have reqId generated here, then where can middleware get it from? header?
+
+
+const responseAction = (response:any)=> ({ response});
+
+// creators don't need to satisfy type
+const creators = {
+  catchAllException:  noParamsCreator,
+
+  refreshToken: (refreshToken:string)=>({body:{refreshToken}}),               // refresh token will be called only by middleware with the refreshToken from state
+  login:         (email:string, password:string)=>({body:{email,password}}),  // put it into body
+  refreshResponse: responseAction,
+  loginResponse: responseAction,
+
+  loginError: responseAction,
+  loginException: noParamsCreator,
+
+  loginIdp:     aCreate,  // implement later
+};
+
 
 export const sliceConfig:SliceConfig = {name: "auth", initialState, creators, reducers};
 
 
+/*
+my todo list
 
+fix up the creators
+let middleware call the refreshToken, after determining the expiration on a per token basis
+make a login dialog
+generate error notification actions from middleware
+*/
