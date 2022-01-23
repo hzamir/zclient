@@ -3,7 +3,6 @@ import styled from 'styled-components';
 
 import {Ladom} from "./Ladom";
 import {Login} from './Login';
-import {tsToTime} from "./xform/datexforms";
 import {MyGrid} from "./MyGrid";
 import {columnDefsMap} from "./xform/columndefs";
 import {StateForm} from "./StateForm";
@@ -52,6 +51,7 @@ Layout.defaultProps = {left:200, right:100};
 
 const Navbar = styled.section`
     grid-area: Navbar;
+    padding-top: 5px;
     background-color: ${palette.midnight};
     color: ${palette.drab};
 `;
@@ -96,6 +96,31 @@ const secondsFormatter = (params)=>isNumber(params.value)? params.value.toFixed(
 
 
 let interval;
+
+const topCssAttributes = `
+  padding-right:          5px;
+  padding-left:          5px;
+  margin-left: 5px;
+  margin-right: 5px;
+`;
+
+const TopItem   = styled.span`
+${topCssAttributes}
+:after {
+  content: '\\00a0\\00a0'; // effectively nbsp
+  width: 0;
+  //height: 100%;
+  border-right: 1px solid white;
+  top: 0;
+  bottom: 0;
+}
+
+
+`; // sharing attributes since don't want button to inherit span
+const TopButton = styled.button`${topCssAttributes}`;
+
+
+const wholeSeconds = (seconds) => seconds.toLocaleString('en-US', {minimumIntegerDigits:3, maximumFractionDigits:0});
 const  App = (props) => {
   // useSelector got complex because we didn't compensate for adding slices
   // resimplify after adding some types to make this easier
@@ -142,32 +167,31 @@ const  App = (props) => {
 
   // console.info(`props for grid are ${rowDataProp}`, columnDefs, rowData, aQuotes);
 
+  const secsLeft = Math.trunc((tokenExpiration*1000 - Date.now()) * 0.001);
 
    return  (
         <Layout left={left} right={right}>
-            <Navbar>There is text here
+            <Navbar>
+              <TopButton onClick={()=>pickGrid('Trades')}>Trades</TopButton>
+              <TopButton onClick={()=>pickGrid('Quotes')}>Quotes</TopButton>
+              <TopButton onClick={()=>pickGrid('Parties')}>Parties</TopButton>
 
-              <button onClick={()=>pickGrid('Trades')}>Trades</button>
-              <button onClick={()=>pickGrid('Quotes')}>Quotes</button>
-              <button onClick={()=>pickGrid('Parties')}>Parties</button>
+              <TopButton onClick={()=>fatal({msg:'I am fatal'})}>Fatal Message</TopButton>
+              <TopButton onClick={()=>error({msg:'Seen one error'})}>Error Message</TopButton>
+              <TopButton onClick={()=>warn({msg:'This is a warning with Dismiss as a remedy', remedy:'Dismiss'})}>Warning</TopButton>
 
-              <button onClick={()=>fatal({msg:'I am fatal'})}>Fatal Message</button>
-              <button onClick={()=>error({msg:'Seen one error'})}>Error Message</button>
-              <button onClick={()=>warn({msg:'This is a warning with Dismiss as a remedy', remedy:'Dismiss'})}>Warning</button>
+              <TopButton onClick={()=>refresh(refreshToken)}>Refresh Token</TopButton>
+              <TopItem>Seconds left: {wholeSeconds(secsLeft)}</TopItem>
 
-              <button onClick={()=>refresh(refreshToken)}>Refresh Token</button>
-              Current token will expire at {tokenExpiration? tsToTime(tokenExpiration): 'n/a'}
+              <TopItem>Requesting data for: '{gridChoice}'</TopItem>
+              <TopButton onClick={halveInterval}> Halve Interval</TopButton>
+              <TopItem>Polling Interval is: {(pollInterval).toLocaleString('en-US')} milliseconds</TopItem>
+              <TopButton onClick={doubleInterval}> Double Interval</TopButton>
 
-              Requesting data for: '{gridChoice}'
-              <button onClick={halveInterval}> Halve Interval</button>
-              Polling Interval is: {(pollInterval).toLocaleString('en-US')} milliseconds
-              <button onClick={doubleInterval}> Double Interval</button>
-
-              // put some buttons here to switch the grid
-              <button onClick={()=>{toggleLeft(100)}}>Left</button>
-              <button onClick={()=>{toggleRight(300)}}>Right</button>
-              <button onClick={omsVersion}>OMS Version</button>
-              <button onClick={()=>{omsVersion();omsVersion();omsVersion();omsVersion();omsVersion();omsVersion()}}>OMS Version Bomb</button>
+              <TopButton onClick={()=>{toggleLeft(100)}}>Left</TopButton>
+              <TopButton onClick={()=>{toggleRight(300)}}>Right</TopButton>
+              <TopButton onClick={omsVersion}>OMS Version</TopButton>
+              <TopButton onClick={()=>{omsVersion();omsVersion();omsVersion();omsVersion();omsVersion();omsVersion()}}>OMS Version Bomb</TopButton>
 
             </Navbar>
             <Left>In left side bar?</Left>
