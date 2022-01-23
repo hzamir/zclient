@@ -118,13 +118,6 @@ const catchResponse =   (eAction:string, reqId:string,  error:Error)=> {
 type ResponseF = (response:any)=>unknown;
 type CatchF    = (e:Error)=>unknown;
 
-function refreshToken(refreshToken:string, responsef:ResponseF, catchf:CatchF)
-{
-  const url = 'https://auth.prometheusalts.com/api/jwt/refresh' // todo build this from configuration
-
-  axios.post(url, {refreshToken}, axiosConfig).then(responsef).catch(catchf);
-
-}
 
 // read name of action, for now all actions in our slice trigger api calls that are not responses or errors mapped to their
 // results
