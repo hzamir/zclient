@@ -2,6 +2,8 @@ import React, {useEffect, useRef} from 'react';
 import styled from 'styled-components';
 
 import {Ladom} from "./Ladom";
+import {Login} from './Login';
+
 import {MyGrid} from "./MyGrid";
 import {columnDefsMap} from "./xform/columndefs";
 import {StateForm} from "./StateForm";
@@ -100,7 +102,8 @@ const  App = (props) => {
   const {
     control:  {pollInterval},
     local:    {gridChoice, layout:   {left,right}},
-    notify:   {notices:[notice=undefined]}
+    notify:   {notices:[notice=undefined]},
+    auth: {refreshToken}
     } = useSelector(s=>s);
 
   const {aTrades,aQuotes,aParties} = useSelector(selectors);
@@ -167,11 +170,12 @@ const  App = (props) => {
 
 
           <CenterBody>
+            {!refreshToken && <Login/>}
             {notice && notice.level === 'fatal'?
               <Ladom content={notice.msg} noClose/>
                 :
               (notice && notice.remedy === 'Dismiss')?
-                <Ladom content={notice.msg} close={()=>{dismiss(notice.key)}}/>
+                <Ladom content={<h1>notice.msg</h1>} close={()=>{dismiss(notice.key)}}/>
 
                 :<MyGrid rowData={rowData} columnDefs={columnDefs}/>
             }
