@@ -99,7 +99,7 @@ const creators:Creators = {
 
 const reducers:Reducers = {
   closeRequestR:  (state, {respMeta})=>closeRequest(state, respMeta),
-  closeRequestE:  (state, {errrorMeta})=>closeRequest(state, errrorMeta),
+  closeRequestE:  (state, {errorMeta})=>closeRequest(state, errorMeta),
   openRequest:     (state:RequestState, {type, reqId, url}:OpenRequestP)=> ({
     ...state,
     openRequestCount: state.openRequestCount+1,
