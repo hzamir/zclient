@@ -1,6 +1,5 @@
-import {reqIdGenerate} from '../utils/reqIdGenerator';
 import {Action, noParamsCreator, ResponseAction, SliceConfig} from '../actions-integration/types';    // todo move these out of actions
-
+import {decode} from '../utils/decode-jwt'
 
 
 
@@ -84,14 +83,31 @@ type AuthReducers = Record<string, AuthReducer>;
 const reducers:AuthReducers = {
   catchAllException:   s=>s,    // no
 
-  refreshToken:    s=>s,
-  login:           s=>s,
-  refreshResponse: (s, a:ResponseAction) =>({...s, accessToken:a.response.data.token, refreshCount: s.refreshCount + 1 }),
-  loginResponse:   (s, a:ResponseAction)=>({...s, ...a.response.data as SuccessfulLogin, loginCount: s.loginCount + 1}),
+  refresh:         (s, a:ResponseAction)=>({...s, refreshAttempts: s.refreshAttempts + 1}),
+  login:           (s, a:ResponseAction)=>({...s, loginAttempts:   s.loginAttempts   + 1}),
+
+  refreshResponse: (s, a:ResponseAction) =>{
+    const accessToken = a.response.data.token
+    return {...s,
+    accessToken,
+    claims:  decode(accessToken),             // expand the claims of the renewed token
+    refreshCount: s.refreshCount + 1,
+    // we purposely do not clear refresh attempts, they aren't supposed to fail
+    };
+  },
+  loginResponse:   (s, a:ResponseAction)=>{
+    const {refreshToken, accessToken} = a.response.data as SuccessfulLogin;
+    return  { ...s,
+              refreshToken, accessToken,      // get the tokens
+              claims: decode(accessToken),    // expand the claims in the access token
+              loginAttempts: 0,               // clear loginAttempts with success
+              loginCount: s.loginCount + 1    // increment count of actual logins
+            };
+  },
 
   // auth slice tracks failed attempts, other slices (notify, and request) track errors, and request level issues
-  loginError:      (s, a:ResponseAction)=>({...s, loginAttempts: s.loginAttempts + 1}),
-  loginException:  (s, a:ResponseAction)=>({...s, loginAttempts: s.loginAttempts + 1}),
+  loginError:      s=>s,
+  loginException:  s=>s,
 
 
   loginIdp: s=>s,
@@ -107,7 +123,7 @@ const responseAction = (response:any)=> ({ response});
 const creators = {
   catchAllException:  noParamsCreator,
 
-  refreshToken: (refreshToken:string)=>({body:{refreshToken}}),               // refresh token will be called only by middleware with the refreshToken from state
+  refresh: (refreshToken:string)=>({body:{refreshToken}}),               // refresh token will be called only by middleware with the refreshToken from state
   login:         (email:string, password:string)=>({body:{email,password}}),  // put it into body
   refreshResponse: responseAction,
   loginResponse: responseAction,

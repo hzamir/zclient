@@ -3,7 +3,7 @@ import styled from 'styled-components';
 
 import {Ladom} from "./Ladom";
 import {Login} from './Login';
-
+import {tsToTime} from "./xform/datexforms";
 import {MyGrid} from "./MyGrid";
 import {columnDefsMap} from "./xform/columndefs";
 import {StateForm} from "./StateForm";
@@ -15,6 +15,8 @@ import {actions, useSelector} from './actions-integration';
 import {aPartiesSelector, aQuotesSelector, aTradesSelector, selectors} from "./actions/selectors";
 
 import {isNumber} from "luxon/src/impl/util";
+import {DateTime} from "luxon";
+import {TIME_24_WITH_SECONDS} from "luxon/src/impl/formats";
 
 const palette = {
       plum: '#4b54a1',
@@ -103,7 +105,7 @@ const  App = (props) => {
     control:  {pollInterval},
     local:    {gridChoice, layout:   {left,right}},
     notify:   {notices:[notice=undefined]},
-    auth: {refreshToken}
+    auth: {refreshToken, claims: {exp:tokenExpiration}}
     } = useSelector(s=>s);
 
   const {aTrades,aQuotes,aParties} = useSelector(selectors);
@@ -124,7 +126,7 @@ const  App = (props) => {
 
     clearInterval(interval);
     interval = setInterval(pollingAction, pollInterval);
-  }, [gridChoice, pollInterval])
+  }, [gridChoice, pollInterval]);
 
 
   const rowDataPicker = {aTrades, aQuotes, aParties};
@@ -133,6 +135,7 @@ const  App = (props) => {
   const { pickGrid,  toggleLeft, toggleRight, } = actions.local;
   const {omsVersion} = actions.oms;
   const {info,warn,error,fatal,dismiss} = actions.notify;
+  const {refresh} = actions.auth;
 
   const rowDataProp = gridChoice;
   const rowData = rowDataPicker[gridMap[rowDataProp]]||[];
@@ -153,6 +156,9 @@ const  App = (props) => {
               <button onClick={()=>fatal({msg:'I am fatal'})}>Fatal Message</button>
               <button onClick={()=>error({msg:'Seen one error'})}>Error Message</button>
               <button onClick={()=>warn({msg:'This is a warning with Dismiss as a remedy', remedy:'Dismiss'})}>Warning</button>
+
+              <button onClick={()=>refresh(refreshToken)}>Refresh Token</button>
+              Current token will expire at {tokenExpiration? tsToTime(tokenExpiration): 'n/a'}
 
               Requesting data for: '{gridChoice}'
               <button onClick={halveInterval}> Halve Interval</button>
