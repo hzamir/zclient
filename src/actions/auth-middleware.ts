@@ -2,7 +2,10 @@ import axios from 'axios';
 import {reqIdGenerate, elapsedSinceReqId} from "../utils/reqIdGenerator";
 import {firstArgs} from '../utils/first-args';
 import {Action, ErrorMeta, ResponseMeta} from '../actions-integration/types'
-import {sliceConfig, AuthAction} from './auth-slice'  // bring in its actions, and types
+import {sliceConfig, AuthAction, Claims} from './auth-slice'
+import {PNoticeNoKey } from './notify-slice';
+
+import {decode} from '../utils/decode-jwt';  // bring in its actions, and types
 
 //local minimal type definitions to squeak through in ts
 
@@ -14,6 +17,11 @@ import {sliceConfig, AuthAction} from './auth-slice'  // bring in its actions, a
 type BoundAction = (a:Action)=>unknown;
 type NextF = BoundAction;
 
+
+// todo move these to configuration
+const millisToRefreshPriorToExpiration = 30_000;
+const minimumMillisThatMustBeGrantedByFreshToken = millisToRefreshPriorToExpiration * 1.5; // we won't play ball with less than this
+const httpTimeoutPatience = 30_000; // must be long enough for all auth. and appdev/auth requests
 //=====================================================
 const middlestyle = `
     padding: 2px 8px;
@@ -24,6 +32,7 @@ const middlestyle = `
 
 let authActions:any;
 let requestActions:any;
+let notifyActions:any;
 
 
 //  this middleware needs access to other actions
@@ -31,6 +40,7 @@ export const authMiddlewareInit = (actions:any) =>
 {
   authActions = actions.auth; // there must be an auth slice
   requestActions = actions.request;
+  notifyActions = actions.notify;
 };
 
 
@@ -50,7 +60,7 @@ function createUrl(tType:string, action:AuthAction) {
   return `https://${subdomain}.prometheusalts.com/api/${apiCategory}/${specificApi}${tailPath}`
 }
 
-const axiosConfig = { timeout: 30000 };
+const axiosConfig = { timeout: httpTimeoutPatience };
 
 
 
@@ -93,6 +103,7 @@ const response = (rAction:string, reAction:string, reqId:string, response:any) =
     } else {
       authActions[rAction](response, respMeta);
       requestActions.closeRequestR(respMeta);
+      possibleRefreshTrigger(rAction, response);
     }
 
   } catch(err) {
@@ -121,6 +132,38 @@ type CatchF    = (e:Error)=>unknown;
 
 // read name of action, for now all actions in our slice trigger api calls that are not responses or errors mapped to their
 // results
+
+let refreshTimer:ReturnType<typeof setTimeout>;
+
+// we can pulll
+const possibleRefreshTrigger = (rType:string, resp:any) => {
+  if(rType === 'refreshResponse' || rType === 'loginResponse') {
+    if(resp.status === 200) {
+      const accessToken = rType === 'refreshResponse'? resp.data.token: resp.data.accessToken;
+      const {exp} = decode(accessToken) as Claims;
+      const millisFromNow:number = (exp*1000 - Date.now());
+
+      if(millisFromNow > minimumMillisThatMustBeGrantedByFreshToken) {
+        const refreshToken = resp.data.refreshToken;
+        clearTimeout(refreshTimer);
+        refreshTimer = setTimeout(() => authActions.refresh(refreshToken), millisFromNow - millisToRefreshPriorToExpiration);
+      } else {
+        const note: PNoticeNoKey = {
+          msg:`Refresh token just received good for only ${millisFromNow} millis`,
+          kind: 'unexpected',
+          remedy: 'Nothing'
+        }
+        notifyActions.fatal(note)
+
+      }
+    } else {
+
+
+    }
+
+    }
+}
+
 
 const triggersApi = (aType:string, sliceName:string) =>
   aType.startsWith(`${sliceName}/`) &&
