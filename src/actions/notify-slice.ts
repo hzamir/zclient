@@ -41,7 +41,7 @@ export interface NotifyState {
 // defaultable properties must still be present in the product, since they are always directly consumed
 type nonDefProp = 'key'|'msg';
 type PNoticeWithKey = Partial<Notice> & Pick<Notice, nonDefProp>  // minimal properties required to create a Notice
-type PNoticeNoKey   = Omit<PNoticeWithKey, 'key'>                 // creators however must manufacture the keys
+export type PNoticeNoKey   = Omit<PNoticeWithKey, 'key'>                 // creators however must manufacture the keys
 
 
 type NotifyCreator = (pn:PNoticeNoKey)=>PNoticeWithKey;
