@@ -3,6 +3,7 @@ import {sliceConfig as localSlice} from "../actions/local-slice";
 import {sliceConfig as controlSlice} from "../actions/control-slice";
 import {sliceConfig as requestSlice} from "../actions/request-slice";
 import {sliceConfig as notifySlice} from "../actions/notify-slice";
+import {sliceConfig as authSlice} from '../actions/auth-slice';
 
 
 import {oReduce} from "../utils/oreduce";
@@ -55,7 +56,7 @@ function validateAllSlices(allSlices)
 
 
 // list of all actions to define
-const allSlices = [omsSlice, localSlice, controlSlice,  requestSlice, notifySlice];
+const allSlices = [omsSlice, localSlice, controlSlice,  requestSlice, notifySlice, authSlice];
 
 
 let combinedReducers, allCreatorsArr;
