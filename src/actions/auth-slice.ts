@@ -17,7 +17,7 @@ export type ClaimAuthType = 'PASSWORD'|'ONE_TIME_PASSWORD'|'PASSWORDLESS'|     /
                       'LDAP_CONNECTOR'|'OPENID_CONNECT'   |                    // some other possibilities
                        'REFRESH_TOKEN'|                                        // refresh post login, presumably
                          'USER_CREATE'|'REGISTRATION'     |'APPLICATION_TOKEN' // other (not exhaustive options)
-interface Claims {
+export interface Claims {
   aud: string;
   exp: number;
   iat: number;
