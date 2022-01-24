@@ -16,7 +16,7 @@ import {aPartiesSelector, aQuotesSelector, aTradesSelector, selectors} from "./a
 import {isNumber} from "luxon/src/impl/util";
 import {SliceView} from "./SliceView";
 import {SnackbarProvider, useSnackbar} from "notistack";
-import {NotifierWrapper} from "./NotifierWrapper";
+import {NotifyWrapper} from "./NotifyWrapper";
 
 const palette = {
       plum: '#4b54a1',
@@ -179,12 +179,10 @@ const  App = () => {
   const secsLeft = Math.trunc((tokenExpiration*1000 - Date.now()) * 0.001);
 
    return  (
-   <SnackbarProvider maxSnack={5}
-                     iconVariant={{success: "✅", error: "✖️", warning: "⚠️", info: "ℹ️",}}
+   <SnackbarProvider maxSnack={5} hideIconVariant
                      anchorOrigin={{vertical: "top", horizontal: "right",}}
-
                      >
-     <NotifierWrapper />
+     <NotifyWrapper />
         <Layout left={left} right={right}>
             <Navbar>
               <TopButton onClick={()=>pickGrid('Trades')}>Trades</TopButton>

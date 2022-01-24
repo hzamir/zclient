@@ -16,29 +16,31 @@ const levelToSnackbarVariant = (level:Notice['level']):VariantType => {
   }
 }
 // dedicated to display of subset of notices we deem should go to Notistack, for now the filter is the dismiss remedy
-export const NotifierWrapper = () => {
+export const NotifyWrapper = () => {
   const notify:NotifyState = useSelector((s:any)=>s.notify );  // todo change from DefaultRootState to correct state
+
   const { enqueueSnackbar, closeSnackbar } = useSnackbar();
   const {dismiss} = actions.notify;
   const notifierAction = (key:Notice['key']) =><button onClick={() => closeSnackbar(key)}>Dismiss</button>
 
   const {notices} = notify;
   useEffect(() => {
-      notices.filter(({remedy,key})=>remedy === 'Acknowledge' && !displayed[key]).forEach(
-        (notice:Notice) => {
+      // reduce right processes items in reverse order
+      notices.filter(({remedy,key})=>remedy === 'Acknowledge' && !displayed[key]).reduceRight(
+        (_:unknown, notice:Notice) => {
           const {level, key, msg}  = notice;
           const variant = levelToSnackbarVariant(level);
-          // display anything currently undisplayed that should be
-          enqueueSnackbar(msg, {
-            key, variant, action: notifierAction,
-            onExited: (event, key) => {
-              dismiss(key);           // action removes it from list
-              delete displayed[key];  // from local tracking too (if necessary--  doubt it)
-            },
-          });
+            enqueueSnackbar(msg, {
+              key, variant, action: notifierAction,
+              onExited: (event, key) => {
+                dismiss(key);           // action removes it from list
+                delete displayed[key];  // from local tracking too (if necessary--  doubt it)
+              },
+            });
+          // }
           displayed[key] = notice;   // keep track of snackbars that we've displayed --- why?
         }
-      );
+     ,null );
 
   }, [notify, closeSnackbar, enqueueSnackbar]);
 
