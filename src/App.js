@@ -1,4 +1,4 @@
-import React, {useEffect, useRef} from 'react';
+import React, {useEffect, useRef, useState} from 'react';
 import styled from 'styled-components';
 
 import {Ladom} from "./Ladom";
@@ -14,6 +14,9 @@ import {actions, useSelector} from './actions-integration';
 import {aPartiesSelector, aQuotesSelector, aTradesSelector, selectors} from "./actions/selectors";
 
 import {isNumber} from "luxon/src/impl/util";
+import {SliceView} from "./SliceView";
+import {SnackbarProvider, useSnackbar} from "notistack";
+import {NotifierWrapper} from "./NotifierWrapper";
 
 const palette = {
       plum: '#4b54a1',
@@ -119,9 +122,15 @@ ${topCssAttributes}
 `; // sharing attributes since don't want button to inherit span
 const TopButton = styled.button`${topCssAttributes}`;
 
+const AllSlices = () => <div>{Object.keys(actions).map((slice)=><SliceView key={slice} slice={slice}/>)}</div>;
 
 const wholeSeconds = (seconds) => seconds.toLocaleString('en-US', {minimumIntegerDigits:3, maximumFractionDigits:0});
-const  App = (props) => {
+
+let messageCtr = 0;
+
+const  App = () => {
+  const [showSlices, setShowSlices] = useState(false);
+
   // useSelector got complex because we didn't compensate for adding slices
   // resimplify after adding some types to make this easier
   const {
@@ -170,15 +179,21 @@ const  App = (props) => {
   const secsLeft = Math.trunc((tokenExpiration*1000 - Date.now()) * 0.001);
 
    return  (
+   <SnackbarProvider maxSnack={5}
+                     iconVariant={{success: "✅", error: "✖️", warning: "⚠️", info: "ℹ️",}}
+                     anchorOrigin={{vertical: "top", horizontal: "right",}}
+
+                     >
+     <NotifierWrapper />
         <Layout left={left} right={right}>
             <Navbar>
               <TopButton onClick={()=>pickGrid('Trades')}>Trades</TopButton>
               <TopButton onClick={()=>pickGrid('Quotes')}>Quotes</TopButton>
               <TopButton onClick={()=>pickGrid('Parties')}>Parties</TopButton>
 
-              <TopButton onClick={()=>fatal({msg:'I am fatal'})}>Fatal Message</TopButton>
-              <TopButton onClick={()=>error({msg:'Seen one error'})}>Error Message</TopButton>
-              <TopButton onClick={()=>warn({msg:'This is a warning with Dismiss as a remedy', remedy:'Dismiss'})}>Warning</TopButton>
+              <TopButton onClick={()=>fatal({msg:`${messageCtr++}: I am fatal`})}>Fatal Message</TopButton>
+              <TopButton onClick={()=>error({msg:`${messageCtr++}: Seen one error`, remedy:'Acknowledge'})}>Error Message</TopButton>
+              <TopButton onClick={()=>warn({msg:`${messageCtr++}: This is a warning with Acknowledge as a remedy`, remedy:'Acknowledge'})}>Warning</TopButton>
 
               <TopButton onClick={()=>refresh(refreshToken)}>Refresh Token</TopButton>
               <TopItem>Seconds left: {wholeSeconds(secsLeft)}</TopItem>
@@ -193,6 +208,7 @@ const  App = (props) => {
               <TopButton onClick={omsVersion}>OMS Version</TopButton>
               <TopButton onClick={()=>{omsVersion();omsVersion();omsVersion();omsVersion();omsVersion();omsVersion()}}>OMS Version Bomb</TopButton>
 
+              <TopButton onClick={()=>setShowSlices(!showSlices)}>Toggle Slice View</TopButton>
             </Navbar>
             <Left>In left side bar?</Left>
 
@@ -202,10 +218,9 @@ const  App = (props) => {
             {notice && notice.level === 'fatal'?
               <Ladom content={notice.msg} noClose/>
                 :
-              (notice && notice.remedy === 'Dismiss')?
+              (notice && notice.remedy === 'Dismiss')? /*Dismiss isn't one of the options */
                 <Ladom content={<h1>notice.msg</h1>} close={()=>{dismiss(notice.key)}}/>
-
-                :<MyGrid rowData={rowData} columnDefs={columnDefs}/>
+                :showSlices?  <AllSlices/>:<MyGrid rowData={rowData} columnDefs={columnDefs}/>
             }
           </CenterBody>
 
@@ -218,8 +233,9 @@ const  App = (props) => {
 
           {/*  </CenterBody>*/}
             <Right>In right sidebar?</Right>
-            <Footer>Status stuff is over here</Footer>
+            {/*<Footer>Status stuff is over here</Footer>*/}
         </Layout>
+   </SnackbarProvider>
     );
 };
 

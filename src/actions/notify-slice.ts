@@ -22,7 +22,7 @@ interface Option {
   default: boolean;     // is this option default (when there are more than one
 }
 
-interface Notice  {
+export interface Notice  {
   key: string,          // a unique identifier for the message (reqId's will do fine here to track issues to requests)
   kind: string,         // a description of the kind of issue, a category, like memory, bad data, connection, permission, etc.
   level: Level;
