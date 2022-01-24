@@ -1,21 +1,12 @@
 import axios from 'axios';
 import {reqIdGenerate, elapsedSinceReqId} from "../utils/reqIdGenerator";
 import {firstArgs} from '../utils/first-args';
-import {Action, ErrorMeta, ResponseMeta} from '../actions-integration/types'
+import {Action, NextF, ErrorMeta, ResponseMeta} from '../actions-integration/types'
 import {sliceConfig, AuthAction, Claims} from './auth-slice'
 import {PNoticeNoKey } from './notify-slice';
 
 import {decode} from '../utils/decode-jwt';  // bring in its actions, and types
 
-//local minimal type definitions to squeak through in ts
-
-
-
-
-// next function is basically just a dispatch continuation
-// bound action works the same way
-type BoundAction = (a:Action)=>unknown;
-type NextF = BoundAction;
 
 
 // todo move these to configuration
@@ -126,8 +117,8 @@ const catchResponse =   (eAction:string, reqId:string,  error:Error)=> {
   requestActions.closeRequestE(errorMeta);
 };
 
-type ResponseF = (response:any)=>unknown;
-type CatchF    = (e:Error)=>unknown;
+// type ResponseF = (response:any)=>unknown;
+// type CatchF    = (e:Error)=>unknown;
 
 
 // read name of action, for now all actions in our slice trigger api calls that are not responses or errors mapped to their
@@ -170,7 +161,7 @@ const triggersApi = (aType:string, sliceName:string) =>
   !(aType.endsWith('Response') || aType.endsWith('Error') || aType.endsWith('Exception'))
 
 // todo better way to make middleware act only on its slice
-export const authMiddleware = (store:any) => (next:NextF) => (a:Action) => {
+export const authMiddleware = (/*store:any*/) => (next:NextF) => (a:Action) => {
 
   const aType = a.type || '';  // really it should be a fatal error to have no type, but not our problem
 

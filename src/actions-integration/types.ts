@@ -12,6 +12,12 @@ export interface Action {
   type: string;
 }
 
+// bad types, but at least middleware can squeak by with them
+export type BoundAction = (a:Action)=>unknown;
+export type NextF = BoundAction;
+
+
+
 export const noParamsCreator = {};
 
 export interface ErrorLike  {
