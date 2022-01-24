@@ -1,7 +1,7 @@
 import React, { useState} from 'react';
 import {actions, useSelector} from './actions-integration';
-import {AuthState} from './actions/auth-slice';
 import styled from 'styled-components';
+import {SliceView} from './SliceView';
 
 type InputChangeEventHandler = React.ChangeEventHandler<HTMLInputElement>
 
@@ -24,9 +24,10 @@ const LoginDiv = styled.div`
   margin:           5% auto; /* 15% from the top and centered */
   padding:          20px;
   border:           1px solid #888;
-  width:            40em;
-  height:           400px;
-  overflow-y: auto;
+  width:            auto;
+  height:           auto;
+  max-height: 800px;
+  overflow-y: scroll;
 `;
 
 const BlockLabel = styled.label`
@@ -35,37 +36,9 @@ const BlockLabel = styled.label`
   padding: 10px;
 `
 
-const MyTable = styled.table`
-  margin: 10px 10px;
-  
-  width: 400px;
-  border-collapse: collapse;
-  table-layout: fixed;
-  
-  // alternate row colors
-  tbody tr:nth-child(odd) {
-    background-color: #eee;
-  }
-  tbody tr:nth-child(even) {
-    background-color: #ccc;
-  }
-
-  // property column should be right aligned value
-  tbody tr td:first-child { 
-    text-align:right; 
-  }
-  tbody tr td:nth-child(2) {
-    padding-left: 1em;
-  }
-`
-
-const stringize = (v:any) => JSON.stringify(v)
-
 export const  Login = () => {
   const [name, setName] = useState('hzamir@gmail.com');
   const [ pwd, setPwd] = useState('Willow0602!');
-
-  const auth:AuthState = useSelector((s:any)=>s.auth);
   const {login} = actions.auth;
 
   const hName:InputChangeEventHandler = (event) => setName(event.target.value);
@@ -85,16 +58,11 @@ export const  Login = () => {
           <input type="submit" value="Login" />
         </form>
         <hr/>
+        <SliceView slice='auth'/>
+        <SliceView slice='request'/>
+        <SliceView slice='notify'/>
 
-        <MyTable>
-          <thead>
-            <tr><th>Property</th><th>Value</th></tr>
-          </thead>
-          <tbody>
-          {/*list all the properties of auth slice in the dialog for debugging purposes*/}
-          {Object.entries(auth).map(([k,v])=><tr key={k}><td>{k}:</td><td>{stringize(v)}</td></tr>)}
-          </tbody>
-        </MyTable>
+
       </LoginDiv>
     </LoginBackdrop>
   );
