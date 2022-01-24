@@ -43,7 +43,7 @@ function createUrl(action, method) {
     return `${baseUrl}${path}${tailPath}`;
 }
 
-const axiosConfig = { timeout: 1000 };
+const axiosConfig = { timeout: 3000 };
 
 const sliceName = 'oms';
 
