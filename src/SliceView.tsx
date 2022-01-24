@@ -6,9 +6,10 @@ import {Expandit} from './ExpandIt';
 
 const SliceDiv = styled.div`
   background-color: #fefefe;
-  margin:           5% auto; /* 15% from the top and centered */
+  margin: 5px;
   padding:          5px;
   border:           1px solid #888;
+  
   width:            auto;
 `;
 
