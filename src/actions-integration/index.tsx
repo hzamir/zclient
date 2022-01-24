@@ -9,12 +9,13 @@ import {omsMiddleware, omsMiddlewareInit} from "../actions/oms-middleware";
 import {loggingMiddleware} from "../actions/logging-middleware";
 import {fatalMiddleware} from '../actions/fatal-middleware';
 import {authMiddleware, authMiddlewareInit} from '../actions/auth-middleware';
+import {coverageMiddleware, coverageMiddlewareInit} from '../actions/coverage-middleware';
 
 import React from "react";
 
 
 //----- combine middlewares -----
-const middlewares = applyMiddleware(fatalMiddleware, omsMiddleware, authMiddleware, loggingMiddleware); // make logging last to not record intercepted actions
+const middlewares = applyMiddleware(fatalMiddleware, omsMiddleware, authMiddleware, coverageMiddleware, loggingMiddleware); // make logging last to not record intercepted actions
 
 
 //----- reducer section -----
@@ -34,7 +35,7 @@ export const actions  = actionsInit(bindf);              // binds all the action
 // once actions are available initialize middlewares that need additional access
 omsMiddlewareInit(actions);       // middleware needs access to actions, possibly at initialization time
 authMiddlewareInit(actions);
-
+coverageMiddlewareInit(actions);
 
 
 export function connectRootComponent(WrappedComponent: React.ComponentType) {
