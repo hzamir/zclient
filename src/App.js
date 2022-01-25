@@ -5,10 +5,6 @@ import {Ladom} from "./Ladom";
 import {Login} from './Login';
 import {MyGrid} from "./MyGrid";
 import {columnDefsMap} from "./xform/columndefs";
-import {StateForm} from "./StateForm";
-import { securityLightConfig, sec2, securityLightPlantUml} from "./fsm-configs/security-light";
-import {glassMachineConfig} from "./fsm-configs/glass";
-import {umlHeartbeatSubscription,heartbeatXStateConfig} from './fsm-configs/subscription';
 import {actions, useSelector} from './actions-integration';
 
 import {aPartiesSelector, aQuotesSelector, aTradesSelector, selectors} from "./actions/selectors";
@@ -50,7 +46,7 @@ const Layout = styled.div`
                          "Footer Footer Footer";    
 `;
 
-Layout.defaultProps = {left:200, right:100};
+Layout.defaultProps = {left:200, right:0};
 
 const Navbar = styled.section`
     grid-area: Navbar;
@@ -191,6 +187,8 @@ const  App = () => {
 
               <TopButton onClick={()=>fatal({msg:`${messageCtr++}: I am fatal`})}>Fatal Message</TopButton>
               <TopButton onClick={()=>error({msg:`${messageCtr++}: Seen one error`, remedy:'Acknowledge'})}>Error Message</TopButton>
+
+              <TopButton onClick={()=>warn({msg:`${messageCtr++}: This is a warning with Modal as a remedy`, remedy:'Modal'})}>Modal Warning</TopButton>
               <TopButton onClick={()=>warn({msg:`${messageCtr++}: This is a warning with Acknowledge as a remedy`, remedy:'Acknowledge'})}>Warning</TopButton>
 
               <TopButton onClick={()=>refresh(refreshToken)}>Refresh Token</TopButton>
@@ -202,11 +200,10 @@ const  App = () => {
               <TopButton onClick={doubleInterval}> Double Interval</TopButton>
 
               <TopButton onClick={()=>{toggleLeft(100)}}>Left</TopButton>
-              <TopButton onClick={()=>{toggleRight(300)}}>Right</TopButton>
+              <TopButton onClick={()=>{toggleRight(900)}}>Toggle Slice View</TopButton>
               <TopButton onClick={omsVersion}>OMS Version</TopButton>
               <TopButton onClick={()=>{omsVersion();omsVersion();omsVersion();omsVersion();omsVersion();omsVersion()}}>OMS Version Bomb</TopButton>
 
-              <TopButton onClick={()=>setShowSlices(!showSlices)}>Toggle Slice View</TopButton>
             </Navbar>
             <Left>In left side bar?</Left>
 
@@ -216,22 +213,13 @@ const  App = () => {
             {notice && notice.level === 'fatal'?
               <Ladom content={notice.msg} noClose/>
                 :
-              (notice && notice.remedy === 'Dismiss')? /*Dismiss isn't one of the options */
-                <Ladom content={<h1>notice.msg</h1>} close={()=>{dismiss(notice.key)}}/>
-                :showSlices?  <AllSlices/>:<MyGrid rowData={rowData} columnDefs={columnDefs}/>
+              (notice && notice.remedy === 'Modal')? /*Modal isn't really one of the options */
+                <Ladom content={<div><h1>notice.level</h1><hr/>notice.msg</div>} close={()=>{dismiss(notice.key)}}/>
+                :<MyGrid rowData={rowData} columnDefs={columnDefs}/>
             }
           </CenterBody>
 
-          {/*<CenterBody>*/}
-          {/*    <textarea readOnly={true} value={umlHeartbeatSubscription}/>*/}
-          {/*    <StateForm expanded={true} stConfig={heartbeatXStateConfig}/>*/}
-          {/*    <StateForm expanded={true} stConfig={securityLightConfig}/>*/}
-          {/*    <StateForm expanded={true} stConfig={glassMachineConfig}/>*/}
-          {/*      /!*<MyGrid rowData={rowData} columnDefs={columnDefs}/>*!/*/}
-
-          {/*  </CenterBody>*/}
-            <Right>In right sidebar?</Right>
-            {/*<Footer>Status stuff is over here</Footer>*/}
+            <Right><AllSlices/></Right>
         </Layout>
    </SnackbarProvider>
     );
