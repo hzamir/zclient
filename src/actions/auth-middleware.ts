@@ -10,8 +10,8 @@ import {decode} from '../utils/decode-jwt';  // bring in its actions, and types
 
 
 // todo move these to configuration
-const millisToRefreshPriorToExpiration = 30_000;
-const minimumMillisThatMustBeGrantedByFreshToken = millisToRefreshPriorToExpiration * 1.5; // we won't play ball with less than this
+const millisToRefreshPriorToExpiration = 78_000;
+const minimumMillisThatMustBeGrantedByFreshToken = 60_000; //millisToRefreshPriorToExpiration * 1.5; // we won't play ball with less than this
 const httpTimeoutPatience = 30_000; // must be long enough for all auth. and appdev/auth requests
 //=====================================================
 const middlestyle = `
@@ -51,10 +51,20 @@ function createUrl(tType:string, action:AuthAction) {
   return `https://${subdomain}.prometheusalts.com/api/${apiCategory}/${specificApi}${tailPath}`
 }
 
-const axiosConfig = { timeout: httpTimeoutPatience };
+// validate all statuses for now, to differentiate between exceptions and errors
+// might have to tighten this up, depending on which status will not have any error details
+const axiosConfig = { timeout: httpTimeoutPatience, validateStatus: (status:number)=>true};
 
+const note = (reqId:string, aType:string, msg:string): PNoticeNoKey => {
 
+  const reqNum = reqId.split('=')[1]; // take part of the request id after the equals sign (with request number)
 
+  return  {
+    msg:`req#:${reqNum} action: ${aType} -- ${msg}`,
+    kind: 'Authentication',
+    remedy: 'Acknowledge'
+  }
+}
 const createErrorMeta = (reqId:string, error:Error):ErrorMeta => {
 
   const {elapsedMicros, elapsedStr:elapsed} = elapsedSinceReqId(performance.now(), reqId);
@@ -75,7 +85,7 @@ const calcReqIdAndResponseTypes = (tType:string) => {
   }
 };
 
-const response = (rAction:string, reAction:string, reqId:string, response:any) => {
+const resolvedResponse = (rAction:string, reAction:string, reqId:string, response:any) => {
   // todo differentiate errorResponses (like non 200 status) and exceptions
 
   const {elapsedMicros, elapsedStr:elapsed} = elapsedSinceReqId(performance.now(), reqId);
@@ -91,15 +101,19 @@ const response = (rAction:string, reAction:string, reqId:string, response:any) =
       // run either specific or generic api error handler
       (authActions[reAction] ?? authActions['authApiCatchAllError'])(errorMeta);
       requestActions.closeRequestE(errorMeta);
+      notifyActions.warn(note(reqId,rAction, errorMeta.message))
+
     } else {
       authActions[rAction](response, respMeta);
       requestActions.closeRequestR(respMeta);
       possibleRefreshTrigger(rAction, response);
     }
 
-  } catch(err) {
-    console.error(`response action error`, rAction, authActions);  // the issue is that the actions are not renamed when exported
-    throw new Error(`authActions.${rAction}`);
+  } catch(err:any) {
+    // something that just should not happen ever should trigger a fatal notification
+    const msg = `response action error '${rAction}' either doesn't exist or it throws an exception, msg=${err.message}`;
+    notifyActions.fatal(note(reqId,rAction, msg));
+    throw(err); // rethrow for stack sake?
   }
 }
 
@@ -110,11 +124,13 @@ const catchResponse =   (eAction:string, reqId:string,  error:Error)=> {
   // error information includes properties of error, reqId and elapsed time since request was made
   const errorMeta = {name, message, reqId, elapsed, elapsedMicros, stack };
 
-  console.error(`${eAction} reqId:${reqId} exception after: ${elapsed}`, errorMeta);
+  const errMsg = `${eAction} reqId:${reqId} api triggers exception after: ${elapsed}`
+  console.error(errMsg, errorMeta);
 
   // run either specific or generic api error handler
   (authActions[eAction] ?? authActions['authApiCatchAllException'])(errorMeta);
   requestActions.closeRequestE(errorMeta);
+  notifyActions.error(note(reqId,eAction, errorMeta.message))
 };
 
 // type ResponseF = (response:any)=>unknown;
@@ -174,7 +190,7 @@ export const authMiddleware = (/*store:any*/) => (next:NextF) => (a:Action) => {
 
   // from this point on it is an authAction, meaning it must have a reqId
   const action: AuthAction = a as AuthAction;
-  const responsef = firstArgs(response, rAction, reAction, reqId);  // determine the reponse function to call
+  const responsef = firstArgs(resolvedResponse, rAction, reAction, reqId);  // determine the reponse function to call
   const catchf    = firstArgs(catchResponse, eAction, reqId);
 
   const url = createUrl(tType, action);
