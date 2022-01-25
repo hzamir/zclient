@@ -83,8 +83,9 @@ type AuthReducers = Record<string, AuthReducer>;
 const reducers:AuthReducers = {
   catchAllException:   s=>s,    // no
 
-  refresh:         (s, a:ResponseAction)=>({...s, refreshAttempts: s.refreshAttempts + 1}),
-  login:           (s, a:ResponseAction)=>({...s, loginAttempts:   s.loginAttempts   + 1}),
+  refresh:        s=>s, // silly me, these reducers aren't called at all
+  login:          s=>s,
+  loginIdp:       s=>s,
 
   refreshResponse: (s, a:ResponseAction) =>{
     const accessToken = a.response.data.token
@@ -106,11 +107,12 @@ const reducers:AuthReducers = {
   },
 
   // auth slice tracks failed attempts, other slices (notify, and request) track errors, and request level issues
-  loginError:      s=>s,
-  loginException:  s=>s,
+  loginError:       (s)=>({...s, loginAttempts:   s.loginAttempts   + 1}),
+  loginException:   (s)=>({...s, loginAttempts:   s.loginAttempts   + 1}),
 
+  refreshError:      (s)=>({...s, refreshAttempts: s.refreshAttempts + 1}),
+  refreshException:  (s)=>({...s, refreshAttempts: s.refreshAttempts + 1}),
 
-  loginIdp: s=>s,
 };
 
 // the reqId is actually added later by middleware
@@ -125,13 +127,16 @@ const creators = {
 
   refresh: (refreshToken:string)=>({body:{refreshToken}}),               // refresh token will be called only by middleware with the refreshToken from state
   login:         (email:string, password:string)=>({body:{email,password}}),  // put it into body
-  refreshResponse: responseAction,
-  loginResponse: responseAction,
+  loginIdp:     aCreate,  // implement later
 
-  loginError: responseAction,
+  refreshResponse: noParamsCreator,
+  refreshError: noParamsCreator,
+  refreshException: noParamsCreator,
+
+  loginResponse: responseAction,
+  loginError: noParamsCreator,
   loginException: noParamsCreator,
 
-  loginIdp:     aCreate,  // implement later
 };
 
 
