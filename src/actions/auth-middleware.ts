@@ -10,8 +10,8 @@ import {decode} from '../utils/decode-jwt';  // bring in its actions, and types
 
 
 // todo move these to configuration
-const millisToRefreshPriorToExpiration = 78_000;
-const minimumMillisThatMustBeGrantedByFreshToken = 60_000; //millisToRefreshPriorToExpiration * 1.5; // we won't play ball with less than this
+const millisToRefreshPriorToExpiration = 30_000;
+const minimumMillisThatMustBeGrantedByFreshToken = millisToRefreshPriorToExpiration * 1.5; // we won't play ball with less than this
 const httpTimeoutPatience = 30_000; // must be long enough for all auth. and appdev/auth requests
 //=====================================================
 const middlestyle = `
