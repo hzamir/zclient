@@ -2,6 +2,8 @@ import React, { useState} from 'react';
 import {actions, useSelector} from './actions-integration';
 import styled from 'styled-components';
 import {SliceView} from './SliceView';
+import {AuthState} from './actions/auth-slice';
+import {TotalState} from './actions/combined-slices';
 
 type InputChangeEventHandler = React.ChangeEventHandler<HTMLInputElement>
 
@@ -37,6 +39,9 @@ const BlockLabel = styled.label`
 `
 
 export const  Login = () => {
+
+  const {loginAttempts} = useSelector<Readonly<AuthState>>(s=>s.auth); // pulling this selector to get updates to dialog after attempts
+
   const [name, setName] = useState('hzamir@gmail.com');
   const [ pwd, setPwd] = useState('Willow0602!');
   const {login} = actions.auth;
@@ -58,11 +63,8 @@ export const  Login = () => {
           <input type="submit" value="Login" />
         </form>
         <hr/>
+        <p>login attempts: {loginAttempts}</p>
         <SliceView slice='auth'/>
-        <SliceView slice='request'/>
-        <SliceView slice='notify'/>
-
-
       </LoginDiv>
     </LoginBackdrop>
   );
