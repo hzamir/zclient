@@ -35,8 +35,10 @@ function validateSlice(slice:SliceConfig)
   const identicallyKeyed = identicalKeys(slice.creators, slice.reducers);
   console.log(`validating slice ${slice.name}`);
 
-  if(!identicallyKeyed)
+  if(!identicallyKeyed) {
+    console.error(`creators vs keys`, Object.keys(slice.creators).sort(),Object.keys(slice.reducers).sort());
     throwIt(`Slice ${slice.name} does not have identical set of creators and reducers`); // todo better detail later
+  }
 }
 // test combined set of slices for unique names, valid slice names, correctness, etc.
 function validateAllSlices(allSlices:SliceConfig[])
