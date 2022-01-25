@@ -129,8 +129,8 @@ const creators = {
   login:         (email:string, password:string)=>({body:{email,password}}),  // put it into body
   loginIdp:     aCreate,  // implement later
 
-  refreshResponse: noParamsCreator,
-  refreshError: noParamsCreator,
+  refreshResponse: responseAction,
+  refreshError: responseAction,
   refreshException: noParamsCreator,
 
   loginResponse: responseAction,
