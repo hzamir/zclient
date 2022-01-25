@@ -3,7 +3,6 @@ import {actions, useSelector} from './actions-integration';
 import styled from 'styled-components';
 import {SliceView} from './SliceView';
 import {AuthState} from './actions/auth-slice';
-import {TotalState} from './actions/combined-slices';
 
 type InputChangeEventHandler = React.ChangeEventHandler<HTMLInputElement>
 
