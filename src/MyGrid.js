@@ -12,11 +12,11 @@ export const  MyGrid = ({rowData, columnDefs, ref}) => {
         <div className="ag-theme-dark" style={style}>
             <AgGridReact
                 ref={gridRef}
+                immutableData={true}
                 defaultColDef={{enableRowGroup:true}}
                 toolPanel={'columns'}
                 showToolPanel={true}
                 reactNext={true}
-                deltaRowDataMode={true}
                 getRowNodeId={data=>data.id}
                 columnDefs={columnDefs} rowData={rowData}/>
         </div>
