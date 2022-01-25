@@ -214,7 +214,7 @@ const  App = () => {
               <Modal content={notice.msg} noClose/>
                 :
               (notice && notice.remedy === 'Modal')? /*Modal isn't really one of the options */
-                <Modal content={<div><h1>notice.level</h1><hr/>notice.msg</div>} close={()=>{dismiss(notice.key)}}/>
+                <Modal content={<div><h1>{notice.level}</h1><hr/>{notice.msg}</div>} close={()=>{dismiss(notice.key)}}/>
                 :<MyGrid rowData={rowData} columnDefs={columnDefs}/>
             }
           </CenterBody>
