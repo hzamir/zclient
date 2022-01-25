@@ -12,12 +12,14 @@ const middlestyle = `
 
  let omsActions;
  let requestActions;
+ let notifyActions;
 
 //  this middleware needs access to other actions
 export const omsMiddlewareInit = (actions) =>
 {
     omsActions = actions.oms; // there must be an oms slice
     requestActions = actions.request;
+    notifyActions = actions.notify;
 };
 
 
@@ -73,7 +75,8 @@ const response = (rAction, reqId, response) => {
     }
 }
 
-const catchResponse =   (eAction, reqId,  error)=> {
+
+const catchResponse =   (eAction, reqId,  oAction, error)=> {
     const {elapsedMicros, elapsedStr:elapsed} = elapsedSinceReqId(performance.now(), reqId);
     const {name,message,stack} = error;
 
@@ -85,6 +88,11 @@ const catchResponse =   (eAction, reqId,  error)=> {
     // run either specific or generic api error handler
     (omsActions[eAction] ?? omsActions['omsApiCatchAllError'])(errorMeta);
     requestActions.closeRequestE(errorMeta);
+
+    const reqNum = reqId.split('=')[1]; // take part of the request id after the equals sign (with request number)
+
+    // now report it with the original action that created the request to understand the notification better
+    notifyActions.error({kind:'Oms', remedy:'Acknowledge', msg: `req#:${reqNum} action: ${oAction} -- ${message}`});
 };
 
 
@@ -102,11 +110,12 @@ export const omsMiddleware = store => next => action => {
 
     const {reqId, rAction, eAction} = calcReqIdAndResponseTypes(aType);
 
-    const responsef = firstArgs(response, rAction, reqId);  // determine the reponse function to call
-    const catchf    = firstArgs(catchResponse, eAction, reqId);
-
     const method = action.post? 'post': 'get';
     const url = createUrl(action,method);
+
+    const responsef = firstArgs(response, rAction, reqId);  // determine the reponse function to call
+    const catchf    = firstArgs(catchResponse, eAction, reqId, aType);
+
 
     console.log(`%c ${aType} sends ${url}`, middlestyle);
 
