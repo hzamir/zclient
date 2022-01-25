@@ -152,8 +152,9 @@ export function connectRootComponent(WrappedComponent: React.ComponentType) {
 
 // if we don't create our own alias to useSelector, then every component that uses it relies directly on redux
 // whereas this could be satisfied with other state management libraries
+// still having issues here https://stackoverflow.com/questions/57472105/react-redux-useselector-typescript-type-for-state
+export const useSelector: TypedUseSelectorHook<TotalState> = reduxUseSelector;
 
-export const useSelector: TypedUseSelectorHook<TotalState> = reduxUseSelector
 // todo starts here
 // + kill files actions.js and reducers.js so that all integration happens in actions-integration
 // + make a single file that imports all the slices and constructs the overal state type
