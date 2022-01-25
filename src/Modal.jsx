@@ -47,7 +47,7 @@ const Close = styled.span`
 //        <Close>&times;</Close>
 
 // implemented as a class solely for the sake of the React Ref, per documentation
-export class Ladom extends React.Component {
+export class Modal extends React.Component {
 
   setRef    = el  => this.modalElement=el;
   closeIt   = ()  => this.modalElement.style.display='none';

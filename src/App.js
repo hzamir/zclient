@@ -1,7 +1,7 @@
 import React, {useEffect, useRef, useState} from 'react';
 import styled from 'styled-components';
 
-import {Ladom} from "./Ladom";
+import {Modal} from "./Modal";
 import {Login} from './Login';
 import {MyGrid} from "./MyGrid";
 import {columnDefsMap} from "./xform/columndefs";
@@ -211,10 +211,10 @@ const  App = () => {
           <CenterBody>
             {!refreshToken && <Login/>}
             {notice && notice.level === 'fatal'?
-              <Ladom content={notice.msg} noClose/>
+              <Modal content={notice.msg} noClose/>
                 :
               (notice && notice.remedy === 'Modal')? /*Modal isn't really one of the options */
-                <Ladom content={<div><h1>notice.level</h1><hr/>notice.msg</div>} close={()=>{dismiss(notice.key)}}/>
+                <Modal content={<div><h1>notice.level</h1><hr/>notice.msg</div>} close={()=>{dismiss(notice.key)}}/>
                 :<MyGrid rowData={rowData} columnDefs={columnDefs}/>
             }
           </CenterBody>
