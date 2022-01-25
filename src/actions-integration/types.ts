@@ -6,6 +6,7 @@ export interface SliceConfig {
    initialState: unknown;
    creators: Record<string, unknown>;
    reducers: Record<string, unknown>;
+   unboundActions?:any;                   // this is added in later, not attempt to add this yourself
 }
 
 export interface Action {
