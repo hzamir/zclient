@@ -22,7 +22,7 @@ const initialState:LocalState = {
   gridChoice: 'Trades',
   layout: {
     left: 100,
-    right: 100,
+    right: 0,
   }
 };
 
