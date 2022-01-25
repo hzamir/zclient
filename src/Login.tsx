@@ -55,7 +55,6 @@ export const  Login = () => {
   }
 
   return (
-    <LoginBackdrop>
       <LoginDiv>
         <form onSubmit={submit}>
           <BlockLabel >Name:     <input type="text" value={name} onChange={hName} /></BlockLabel>
@@ -66,7 +65,6 @@ export const  Login = () => {
         <p>login attempts: {loginAttempts}</p>
         <SliceView slice='auth'/>
       </LoginDiv>
-    </LoginBackdrop>
   );
 
 }
